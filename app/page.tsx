@@ -38,16 +38,59 @@ export default function EcommerceHomepage() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  // Tradutor Local (Mocking EN -> PT-BR)
+  const translateProduct = (prod: Product): Product => {
+    const categoryMap: Record<string, string> = {
+      "men's clothing": "Moda Masculina",
+      "women's clothing": "Moda Feminina",
+      "jewelery": "Joias",
+      "electronics": "Eletrônicos"
+    };
+
+    const titleMap: Record<number, string> = {
+      1: "Mochila Fjallraven Foldsack No. 1",
+      2: "Camiseta Casual Premium Slim Fit",
+      3: "Jaqueta de Algodão Masculina Elegante",
+      4: "Camiseta Manga Longa Casual Slim",
+      5: "Pulseira de Prata de Lei Coleção Lendas",
+      6: "Anel de Ouro Branco Maciço Petite",
+      7: "Anel Banhado a Ouro Princesa Coruja",
+      8: "Brincos de Aço Inoxidável Banhado a Ouro",
+      9: "HD Externo Portátil WD 2TB",
+      10: "SSD Interno SanDisk 1TB Velocidade Ultra",
+      11: "SSD Interno Silicon Power 256GB",
+      12: "HD Externo WD 4TB Gaming Drive",
+      13: "Monitor Acer SB220Q 21.5\" IPS Full HD",
+      14: "Monitor Curvo Samsung 49\" QLED 144Hz",
+      15: "Jaqueta de Inverno 3 em 1 Feminina",
+      16: "Jaqueta de Couro Sintético Motoqueira",
+      17: "Casaco de Chuva Feminino Forrado",
+      18: "Camiseta Feminina Básica Decote em V",
+      19: "Blusa Feminina Manga Curta Decote Redondo",
+      20: "Camiseta Casual de Algodão Feminina"
+    };
+
+    return {
+      ...prod,
+      category: categoryMap[prod.category] || prod.category,
+      title: titleMap[prod.id] || prod.title,
+      description: "Descubra a excelência e durabilidade desta peça exclusiva. Projetada com atenção aos mínimos detalhes para oferecer o máximo de conforto, estilo e um acabamento impecável para o seu dia a dia.",
+    };
+  };
+
   // 1. Fetching Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://fakestoreapi.com/products";
         const res = await fetch(apiUrl);
-        const data = await res.json();
-        setProducts(data);
+        const data: Product[] = await res.json();
+        
+        // Aplica a tradução programática
+        const translatedData = data.map(translateProduct);
+        setProducts(translatedData);
       } catch (err) {
-        console.error("Failed to load products", err);
+        console.error("Erro ao carregar os produtos:", err);
       } finally {
         setLoading(false);
       }
