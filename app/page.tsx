@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
+
 // Types
 interface Product {
   id: number;
