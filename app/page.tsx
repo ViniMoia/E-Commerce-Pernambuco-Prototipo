@@ -220,21 +220,21 @@ export default function EcommerceHomepage() {
     <div className="min-h-screen bg-[#050505] text-[#e5e5e5] overflow-x-hidden selection:bg-[#DDAF02]/30 fade-in">
       
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-[60] px-6 md:px-12 py-6 flex justify-between items-center pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-[60] px-6 md:px-12 py-6 flex justify-between items-center pointer-events-none max-[1500px]:py-4">
         {/* Brand */}
-        <div className="pointer-events-auto backdrop-blur-md bg-black/40 px-6 py-3 rounded-full border border-white/10 flex items-center">
-          <h1 className="text-lg md:text-xl font-bold tracking-widest text-white uppercase drop-shadow-md flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02]"></span>
-            IBI STORE
+        <div className="pointer-events-auto backdrop-blur-md bg-black/40 px-6 py-3 rounded-full border border-white/10 flex items-center max-[1500px]:px-4 max-[1500px]:py-2">
+          <h1 className="text-lg md:text-md font-bold tracking-widest text-white uppercase drop-shadow-md flex items-center gap-2 max-[1500px]:text-xs">
+            <span className="w-2.5 h-2.5 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02] max-[1500px]:w-2 max-[1500px]:h-2"></span>
+            Pernambuco Confecções
           </h1>
         </div>
 
         {/* Auth Navigation */}
-        <nav className="pointer-events-auto flex items-center gap-4">
+        <nav className="pointer-events-auto flex items-center gap-4 max-[1500px]:gap-2">
           <button 
             type="button" 
             onClick={() => { /* TODO: Implement Login */ }}
-            className="px-6 py-3 ml-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50"
+            className="px-6 py-3 ml-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50 max-[1500px]:px-4 max-[1500px]:py-2 max-[1500px]:text-xs"
             aria-label="Login"
           >
             Login
@@ -246,9 +246,9 @@ export default function EcommerceHomepage() {
             className="btn-shimmer-wrap group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50"
             aria-label="Inscrever-se"
           >
-            <span className="btn-shimmer-content py-3 px-6 bg-neutral-950">
+            <span className="btn-shimmer-content py-3 px-6 bg-neutral-950 max-[1500px]:px-4 max-[1500px]:py-2">
               <span className="btn-shimmer-effect"></span>
-              <span className="relative z-10 flex items-center text-sm font-bold tracking-widest uppercase text-white group-hover:text-[#DDAF02] transition-colors">
+              <span className="relative z-10 flex items-center text-sm font-bold tracking-widest uppercase text-white group-hover:text-[#DDAF02] transition-colors max-[1500px]:text-xs">
                 Inscrever-se
               </span>
             </span>
@@ -264,11 +264,11 @@ export default function EcommerceHomepage() {
         {heroProducts.map((prod, idx) => (
           <div 
             key={`hero-${prod.id}`} 
-            className={`absolute inset-0 flex flex-col md:flex-row items-center justify-center p-6 md:p-24 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${idx === heroIndex ? 'opacity-100 z-10 scale-100 blur-0' : 'opacity-0 z-0 scale-105 blur-lg pointer-events-none'}`}
+            className={`absolute inset-0 flex flex-col md:flex-row items-center justify-center p-6 md:p-24 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${idx === heroIndex ? 'opacity-100 z-10 scale-100 blur-0' : 'opacity-0 z-0 scale-105 blur-lg pointer-events-none'} max-[1500px]:pt-32`}
           >
             {/* Visual Subject */}
             <div className="w-full md:w-1/2 flex justify-center mt-24 md:mt-0 relative">
-               <div className="relative w-64 h-64 md:w-[32rem] md:h-[32rem] glass-panel rounded-full flex items-center justify-center p-12 shadow-2xl group">
+               <div className="relative w-64 h-64 md:w-[32rem] md:h-[32rem] glass-panel rounded-full flex items-center justify-center p-12 shadow-2xl group max-[1500px]:w-[24rem] max-[1500px]:h-[24rem] max-[1500px]:p-8">
                   <div className="absolute inset-0 bg-[#DDAF02]/20 rounded-full blur-[80px] -z-10 animate-pulse mix-blend-screen" />
                   <img 
                     src={prod.image} 
@@ -279,18 +279,18 @@ export default function EcommerceHomepage() {
             </div>
 
             {/* Typography Content */}
-            <div className="w-full md:w-1/2 mt-12 md:mt-0 flex flex-col justify-center space-y-6 md:space-y-8 z-20 md:pl-12">
+            <div className="w-full md:w-1/2 mt-12 md:mt-0 flex flex-col justify-center space-y-6 md:space-y-8 z-20 md:pl-12 max-[1500px]:space-y-4 max-[1500px]:pl-8">
               <div className="relative">
                 <div className="absolute -left-6 top-2 bottom-2 w-1 bg-[#DDAF02] rounded-full hidden md:block" />
-                <span className="text-xs uppercase tracking-[0.3em] font-mono text-[#DDAF02] font-bold">
+                <span className="text-xs uppercase tracking-[0.3em] font-mono text-[#DDAF02] font-bold max-[1500px]:text-[10px]">
                   Destaque Premium {idx + 1} / 5
                 </span>
-                <h2 className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tighter mt-4 leading-[1.1] line-clamp-3">
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tighter mt-4 leading-[1.1] line-clamp-3 max-[1500px]:!text-5xl max-[1500px]:mt-2">
                   {prod.title}
                 </h2>
               </div>
               
-              <p className="text-neutral-400 text-sm md:text-lg font-light max-w-xl line-clamp-2 leading-relaxed">
+              <p className="text-neutral-400 text-sm md:text-lg font-light max-w-xl line-clamp-2 leading-relaxed max-[1500px]:text-sm">
                 {prod.description}
               </p>
               
@@ -398,7 +398,7 @@ export default function EcommerceHomepage() {
              <span className="text-white font-bold tracking-widest uppercase">IBI STORE</span>
           </div>
           <p className="text-neutral-500 font-mono text-sm uppercase tracking-wider">
-            © 2026. Feito com rigor estético.
+            © 2026. Vancer.
           </p>
         </div>
       </footer>
