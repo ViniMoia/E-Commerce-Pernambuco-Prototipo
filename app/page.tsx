@@ -221,12 +221,39 @@ export default function EcommerceHomepage() {
       
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[60] px-6 md:px-12 py-6 flex justify-between items-center pointer-events-none">
-        <div className="pointer-events-auto backdrop-blur-md bg-black/40 px-6 py-3 rounded-full border border-white/10">
+        {/* Brand */}
+        <div className="pointer-events-auto backdrop-blur-md bg-black/40 px-6 py-3 rounded-full border border-white/10 flex items-center">
           <h1 className="text-lg md:text-xl font-bold tracking-widest text-white uppercase drop-shadow-md flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02]"></span>
             IBI STORE
           </h1>
         </div>
+
+        {/* Auth Navigation */}
+        <nav className="pointer-events-auto flex items-center gap-4">
+          <button 
+            type="button" 
+            onClick={() => { /* TODO: Implement Login */ }}
+            className="px-6 py-3 ml-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50"
+            aria-label="Login"
+          >
+            Login
+          </button>
+          
+          <button 
+            type="button"
+            onClick={() => { /* TODO: Implement Inscrever-se */ }}
+            className="btn-shimmer-wrap group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50"
+            aria-label="Inscrever-se"
+          >
+            <span className="btn-shimmer-content py-3 px-6 bg-neutral-950">
+              <span className="btn-shimmer-effect"></span>
+              <span className="relative z-10 flex items-center text-sm font-bold tracking-widest uppercase text-white group-hover:text-[#DDAF02] transition-colors">
+                Inscrever-se
+              </span>
+            </span>
+          </button>
+        </nav>
       </header>
 
       {/* Hero Section */}
