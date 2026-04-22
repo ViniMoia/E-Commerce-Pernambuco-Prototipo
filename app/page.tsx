@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-
+import Link from "next/link";
 
 // Types
 interface Product {
@@ -240,9 +240,8 @@ export default function EcommerceHomepage() {
             Login
           </button>
           
-          <button 
-            type="button"
-            onClick={() => { /* TODO: Implement Inscrever-se */ }}
+          <Link 
+            href="/register"
             className="btn-shimmer-wrap group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50"
             aria-label="Inscrever-se"
           >
@@ -252,7 +251,7 @@ export default function EcommerceHomepage() {
                 Inscrever-se
               </span>
             </span>
-          </button>
+          </Link>
         </nav>
       </header>
 

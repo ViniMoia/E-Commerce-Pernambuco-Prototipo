@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IBI Store",
+  title: "Pernambuco Confecções",
   description: "Construindo interfaces reais com movimento.",
 };
 
