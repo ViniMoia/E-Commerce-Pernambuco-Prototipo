@@ -13,3 +13,108 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+model Loja{
+  id String @id @default(uuid())
+  name String
+  slug String @unique
+  description String 
+  coverImageUrl String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User[]
+  products Product[]
+}
+
+model User{
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  phone String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  avatarImageUrl String?
+  lojaID String
+  loja Loja @relation(fields: [LojaID], references: [id])
+  products Product[]
+  address Address[]
+}
+
+model Address {
+  id String @id @default(uuid())
+  cep int
+  city String
+  district String
+  street String
+  number String
+  complement String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userID], references: [id])
+  userID String
+  isDefault Boolean @default(false)
+}
+
+model Product{
+  id String @id @default(uuid())
+  name String
+  description String
+  price Float
+  imageUrl String
+  stock int
+  lojaID String
+  loja Loja @relation(fields: [lojaID], references: [id], onDelete: Cascade)
+  userID String
+  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cartItem CartItem[]
+}
+
+model ProductVariants {
+id String @id @default(uuid())
+ProductID String
+product Product @relation(fields: [ProductID], references: [id], onDelete: Cascade)
+size String
+color String
+stock int
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+cartItem CartItem[]
+}
+
+model cart {
+  id String @id @default(uuid())
+  userID String
+  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  items CartItem[]
+  status CartStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem{
+  id String @id @default(uuid())
+  cartID String
+  cart Cart @relation(fields: [cartID], references: [id], onDelete: Cascade)
+  productID String
+  product Product @relation(fields: [productID], references: [id], onDelete: Cascade)
+  variantID String
+  variant ProductVariants @relation(fields: [variantID], references: [id], onDelete: Cascade)
+  quantity int
+  productName String
+  price Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+}
+
+
+enum CartStatus{
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+
