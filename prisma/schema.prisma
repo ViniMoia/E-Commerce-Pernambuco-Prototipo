@@ -4,8 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -25,34 +24,47 @@ model Loja {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  name           String
-  email          String    @unique
-  password       String
-  phone          String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  avatarImageUrl String?
-  lojaID         String
-  loja           Loja      @relation(fields: [lojaID], references: [id])
-  products       Product[]
-  address        Address[]
-  carts          Cart[]
+  id                String    @id @default(uuid())
+  name              String    @db.VarChar(150)
+  email             String    @unique @db.VarChar(255)
+  password          String    @db.VarChar(255)
+  phone             String?   @db.VarChar(20)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  avatarImageUrl    String?
+  role              String    @default("CUSTOMER")
+  emailVerified     DateTime?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  lojaID            String
+  loja              Loja      @relation(fields: [lojaID], references: [id])
+  products          Product[]
+  addresses         Address[]
+  carts             Cart[]
+  defaultAddressId  String?   @unique
+  defaultAddress    Address?  @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
+
+  @@index([email])
+  @@index([lojaID])
+  @@index([defaultAddressId])
 }
 
 model Address {
-  id         String   @id @default(uuid())
-  cep        Int
-  city       String
-  district   String
-  street     String
-  number     String
-  complement String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userID], references: [id])
-  userID     String
-  isDefault  Boolean  @default(false)
+  id             String   @id @default(uuid())
+  cep            String
+  state          String
+  city           String
+  district       String
+  street         String
+  number         String
+  complement     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userID], references: [id])
+  userID         String
+  defaultForUser User?    @relation("UserDefaultAddress")
+
+  @@index([userID])
 }
 
 model Product {
