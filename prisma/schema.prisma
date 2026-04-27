@@ -4,11 +4,13 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Loja {
@@ -24,25 +26,27 @@ model Loja {
 }
 
 model User {
-  id                String    @id @default(uuid())
-  name              String    @db.VarChar(150)
-  email             String    @unique @db.VarChar(255)
-  password          String    @db.VarChar(255)
-  phone             String?   @db.VarChar(20)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                String     @id @default(uuid())
+  name              String     @db.VarChar(150)
+  email             String     @unique @db.VarChar(255)
+  password          String     @db.VarChar(255)
+  phone             String?    @db.VarChar(20)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
   avatarImageUrl    String?
-  role              String    @default("CUSTOMER")
+  role              String     @default("CUSTOMER")
   emailVerified     DateTime?
   resetToken        String?
   resetTokenExpires DateTime?
+  status            UserStatus @default(ACTIVE)
   lojaID            String
-  loja              Loja      @relation(fields: [lojaID], references: [id])
+  loja              Loja       @relation(fields: [lojaID], references: [id])
   products          Product[]
   addresses         Address[]
   carts             Cart[]
-  defaultAddressId  String?   @unique
-  defaultAddress    Address?  @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
+  defaultAddressId  String?    @unique
+  defaultAddress    Address?   @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
+  sessions          Session[]
 
   @@index([email])
   @@index([lojaID])
@@ -125,4 +129,20 @@ enum CartStatus {
   ACTIVE
   COMPLETED
   ABANDONED
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  PENDING
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

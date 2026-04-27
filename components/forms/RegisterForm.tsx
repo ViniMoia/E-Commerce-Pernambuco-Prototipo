@@ -3,24 +3,17 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const onSubmit = async (data) => {
-  await fetch("/api/auth/register", {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-}
+import { useRouter } from "next/navigation";
 
 type RegisterDTO = {
   name: string;
   email: string;
   password: string;
   phone: string;
+  lojaID: string; // Requerido pelo schema/backend
   address: {
     cep: string;
+    state: string; // Requerido pelo backend
     city: string;
     district: string;
     street: string;
@@ -30,12 +23,15 @@ type RegisterDTO = {
 };
 
 export function RegisterForm() {
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
     cep: "",
+    state: "",
     city: "",
     district: "",
     street: "",
@@ -44,32 +40,40 @@ export function RegisterForm() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Remove error message when user starts typing
+    
+    // Limpa a mensagem de erro específica quando o usuário volta a digitar
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    // Limpa o erro geral da API se o usuário modificar os dados
+    if (apiError) setApiError("");
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
     const requiredFields = [
       "name", "email", "password", "phone", 
-      "cep", "city", "district", "street", "number"
+      "cep", "state", "city", "district", "street", "number"
     ];
 
     requiredFields.forEach((field) => {
-      if (!formData[field as keyof typeof formData]) {
+      if (!formData[field as keyof typeof formData] || formData[field as keyof typeof formData].trim() === "") {
         newErrors[field] = "Campo obrigatório";
       }
     });
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "E-mail inválido";
+    }
+    
+    if (formData.password && formData.password.length < 6) {
+      newErrors.password = "A senha deve ter no mínimo 6 caracteres";
     }
 
     setErrors(newErrors);
@@ -78,7 +82,12 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    setApiError("");
+    
+    if (!validate()) {
+      setApiError("Por favor, preencha todos os campos obrigatórios corretamente.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -87,8 +96,11 @@ export function RegisterForm() {
       email: formData.email,
       password: formData.password,
       phone: formData.phone,
+      // Passando um lojaID padrão. No futuro, isso pode vir do subdomínio ou contexto da loja.
+      lojaID: "loja-padrao-id", 
       address: {
         cep: formData.cep,
+        state: formData.state,
         city: formData.city,
         district: formData.district,
         street: formData.street,
@@ -98,27 +110,35 @@ export function RegisterForm() {
     };
 
     try {
-      // Estrutura de fetch mockada para futura integração com Prisma + Supabase
-      /*
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSend)
       });
       
       if (!response.ok) {
-        throw new Error('Falha no registro');
+        let errorMessage = "Ocorreu um erro ao realizar o cadastro.";
+        try {
+          const errorData = await response.json();
+          // Como no route.ts estamos retornando Response.json(error.message, { status: 400 })
+          errorMessage = typeof errorData === 'string' ? errorData : (errorData?.message || errorMessage);
+        } catch {
+          // Se não conseguir parsear o JSON, mantém a mensagem padrão
+        }
+        throw new Error(errorMessage);
       }
-      */
       
-      console.log("Mock enviando dados:", dataToSend);
+      // Segurança: Limpar a senha do frontend imediatamente após sucesso
+      setFormData(prev => ({ ...prev, password: "" }));
       
-      // Simula o tempo de rede
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      alert("Cadastro realizado com sucesso!");
       
-      alert("Cadastro realizado com sucesso! (Mock)");
-    } catch (error) {
+      // Redireciona o usuário (Ex: para a tela de login ou direto para dashboard)
+      router.push("/login");
+      
+    } catch (error: any) {
       console.error("Erro ao registrar:", error);
+      setApiError(error.message || "Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -130,6 +150,12 @@ export function RegisterForm() {
         <h2 className="text-3xl font-bold text-white tracking-tight mb-2">Crie sua conta</h2>
         <p className="text-neutral-400 text-sm">Preencha os dados abaixo para se cadastrar</p>
       </div>
+
+      {apiError && (
+        <div className="mb-6 p-4 rounded-md bg-red-500/10 border border-red-500/50 flex items-center justify-center">
+          <p className="text-red-400 text-sm font-medium text-center">{apiError}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Dados Pessoais */}
@@ -203,7 +229,7 @@ export function RegisterForm() {
             Endereço
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="cep">CEP</Label>
               <Input 
@@ -215,6 +241,20 @@ export function RegisterForm() {
                 className={errors.cep ? "border-red-500" : "focus-visible:ring-[#dbb501] focus-visible:border-[#dbb501]"}
               />
               {errors.cep && <p className="text-red-500 text-xs mt-1">{errors.cep}</p>}
+            </div>
+
+            <div className="space-y-2 md:col-span-1">
+              <Label htmlFor="state">UF (Estado)</Label>
+              <Input 
+                id="state" 
+                name="state" 
+                value={formData.state} 
+                onChange={handleChange} 
+                placeholder="SP"
+                maxLength={2}
+                className={errors.state ? "border-red-500" : "focus-visible:ring-[#dbb501] focus-visible:border-[#dbb501]"}
+              />
+              {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
             </div>
             
             <div className="space-y-2 md:col-span-2">

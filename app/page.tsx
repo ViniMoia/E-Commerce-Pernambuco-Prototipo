@@ -231,14 +231,13 @@ export default function EcommerceHomepage() {
 
         {/* Auth Navigation */}
         <nav className="pointer-events-auto flex items-center gap-4 max-[1500px]:gap-2">
-          <button 
-            type="button" 
-            onClick={() => { /* TODO: Implement Login */ }}
-            className="px-6 py-3 ml-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50 max-[1500px]:px-4 max-[1500px]:py-2 max-[1500px]:text-xs"
+          <Link 
+            href="/login"
+            className="px-6 py-3 ml-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#dbb501]/50 max-[1500px]:px-4 max-[1500px]:py-2 max-[1500px]:text-xs"
             aria-label="Login"
           >
             Login
-          </button>
+          </Link>
           
           <Link 
             href="/register"

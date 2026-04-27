@@ -1,5 +1,6 @@
 import  prisma  from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { LoginInput } from "@/lib/validators/auth";
 
 export async function registerUser(data: {
     name: string;
@@ -28,14 +29,34 @@ export async function registerUser(data: {
 
     const hashedPassword = await bcrypt.hash(data.password, 10)
 
+    // Garantir que a Loja exista para evitar erro de Foreign Key constraint (P2003)
+    let loja = await prisma.loja.findUnique({ where: { id: data.lojaID } });
+    if (!loja) {
+        // Se a loja passada não existir, procura a primeira ou cria uma mock para desenvolvimento
+        loja = await prisma.loja.findFirst();
+        if (!loja) {
+            loja = await prisma.loja.create({
+                data: {
+                    id: data.lojaID,
+                    name: "Loja Padrão",
+                    slug: "loja-padrao",
+                    description: "Loja Padrão",
+                    coverImageUrl: "https://via.placeholder.com/150"
+                }
+            });
+        }
+    }
+
     const user = await prisma.user.create({
         data: {
             name: data.name,
-            email: data.name,
+            email: data.email, // CORRIGIDO: estava data.name
             password: hashedPassword,
             phone: data.phone,
+            lojaID: loja.id, // ADICIONADO: Obrigatório pelo Schema
 
-            address: {
+            // CORRIGIDO: A relação no model User é "addresses" (plural)
+            addresses: {
                 create: {
                     ...data.address
                 }
@@ -43,11 +64,11 @@ export async function registerUser(data: {
         },
 
         include: {
-            address: true
+            addresses: true // CORRIGIDO: plural
         }
     })
 
-    const defaultAddress = user.address[0]
+    const defaultAddress = user.addresses[0]
 
     await prisma.user.update({
         where: { id: user.id },
@@ -57,22 +78,55 @@ export async function registerUser(data: {
     })
 
     return user
-
-    
 }
 
-export async function loginUser(data: {email: string, password: string}) {
-    const user = await prisma.user.findUnique({
-        where: { email: data.email}
-    })
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AuthError";
+  }
+}
 
-    if(!user){
-        throw new Error("Informações erradas")
-    }
+export async function loginUser(data: LoginInput) {
+  const { email, password } = data;
 
-    const isValid = await bcrypt.compare(data.password, user.password)
+  //  1. Normalização (muito importante em produção)
+  const normalizedEmail = email.toLowerCase().trim();
 
-    if(!isValid){
-        throw new Error("informações erradas")
-    }
+  //  2. Buscar usuário (selecionando apenas o necessário)
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: {
+      id: true,
+      email: true,
+      password: true,
+      status: true,
+    },
+  });
+
+  //  3. Mitigação de enumeração de usuário
+  // (não revelar se usuário existe ou não)
+  if (!user) {
+    // simula tempo de bcrypt para evitar timing attack
+    await bcrypt.compare(password, "$2b$10$invalidhashforsimulationlongenough");
+    throw new AuthError("Credenciais inválidas");
+  }
+
+  //  4. Regras de negócio
+  if (user.status === "BLOCKED") {
+    throw new AuthError("Usuário bloqueado");
+  }
+
+  //  5. Comparação segura de senha
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword) {
+    throw new AuthError("Credenciais inválidas");
+  }
+
+  //  6. Retorno mínimo (NUNCA retornar password)
+  return {
+    id: user.id,
+    email: user.email,
+  };
 }
