@@ -101,13 +101,17 @@ model ProductVariants {
 }
 
 model Cart {
-  id        String     @id @default(uuid())
-  userID    String
-  user      User       @relation(fields: [userID], references: [id], onDelete: Cascade)
-  items     CartItem[]
-  status    CartStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           String     @id @default(uuid())
+  userID       String
+  user         User       @relation(fields: [userID], references: [id], onDelete: Cascade)
+  items        CartItem[]
+  status       CartStatus @default(ACTIVE)
+  shippingCost Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([userID])
+  @@index([status])
 }
 
 model CartItem {
@@ -123,6 +127,11 @@ model CartItem {
   price       Float
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  color       String
+  size        String
+  imageUrl    String
+
+  @@unique([cartID, variantID])
 }
 
 enum CartStatus {
