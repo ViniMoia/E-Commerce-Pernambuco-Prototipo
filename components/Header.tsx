@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { User, LogOut } from "lucide-react";
+import { CartButton } from "./cart/CartButton";
 
 export async function Header() {
   const user = await getCurrentUser();
@@ -17,8 +18,11 @@ export async function Header() {
         </Link>
       </div>
 
-      {/* Auth Navigation */}
+      {/* Auth & Cart Navigation */}
       <nav className="pointer-events-auto flex items-center gap-4 max-[1500px]:gap-2">
+        <div className="bg-black/40 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center justify-center">
+          <CartButton />
+        </div>
         {user ? (
           <div className="flex items-center gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
             <Link href="/profile" className="flex items-center gap-3 hover:text-[#DDAF02] transition-colors">

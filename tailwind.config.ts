@@ -7,7 +7,17 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        shimmer: "shimmer 1.5s infinite",
+      },
+      keyframes: {
+        shimmer: {
+          from: { transform: "translateX(-100%) skewX(-15deg)" },
+          to: { transform: "translateX(200%) skewX(-15deg)" },
+        },
+      },
+    },
   },
   plugins: [],
 };
