@@ -43,7 +43,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
       >
         <div className="flex flex-col h-full p-8 pt-24 gap-8 overflow-y-auto">
           {/* Logo inside menu */}
-          <div className="pb-6 border-b border-white/10">
+          <div className={`pb-6 border-b border-white/10 transition-all duration-500 delay-100 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}>
             <h2 className="text-sm font-bold tracking-widest text-white uppercase flex items-center gap-2">
               <span className="w-2 h-2 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02]"></span>
               Pernambuco
@@ -56,7 +56,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
                 <Link 
                   href="/profile" 
                   onClick={toggleMenu}
-                  className="flex items-center gap-4 hover:text-[#DDAF02] transition-colors"
+                  className={`flex items-center gap-4 hover:text-[#DDAF02] transition-all duration-500 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}
                 >
                   <div className="w-10 h-10 rounded-full bg-[#DDAF02]/10 border border-[#DDAF02]/50 flex items-center justify-center overflow-hidden">
                     {user.avatarImageUrl ? (
@@ -71,7 +71,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
                   </div>
                 </Link>
                 
-                <form action="/api/auth/logout" method="POST" className="mt-auto pt-6 border-t border-white/10">
+                <form action="/api/auth/logout" method="POST" className={`mt-auto pt-6 border-t border-white/10 transition-all duration-500 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}>
                   <button type="submit" className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors w-full">
                     <LogOut className="w-5 h-5" />
                     <span className="text-sm font-medium tracking-wide uppercase">Sair da conta</span>
@@ -83,7 +83,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
                 <Link 
                   href="/login"
                   onClick={toggleMenu}
-                  className="w-full py-3 rounded-full border border-white/10 bg-black text-white text-center text-sm font-bold tracking-widest uppercase hover:bg-white/10 transition-colors"
+                  className={`w-full py-3 rounded-full border border-white/10 bg-black text-white text-center text-sm font-bold tracking-widest uppercase hover:bg-white/10 transition-all duration-500 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}
                 >
                   Login
                 </Link>
@@ -91,7 +91,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
                 <Link 
                   href="/register"
                   onClick={toggleMenu}
-                  className="w-full py-3 rounded-full bg-white text-black text-center text-sm font-bold tracking-widest uppercase hover:bg-neutral-200 transition-colors"
+                  className={`w-full py-3 rounded-full bg-white text-black text-center text-sm font-bold tracking-widest uppercase hover:bg-neutral-200 transition-all duration-500 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}
                 >
                   Inscrever-se
                 </Link>

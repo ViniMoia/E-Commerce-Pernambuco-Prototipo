@@ -143,71 +143,74 @@ export default function EcommerceHomepage() {
   // --- PRODUCT DETAILED VIEW ---
   if (selectedProduct) {
     return (
-      <div className="min-h-screen bg-[#050505] text-[#e5e5e5] p-6 md:p-12 fade-in selection:bg-[#DDAF02]/30">
-        
-        {/* Navigation */}
-        <button 
-          onClick={() => setSelectedProduct(null)}
-          className="flex items-center text-neutral-400 hover:text-white transition-colors mb-12 group w-min"
-        >
-          <span className="group-hover:-translate-x-1 transition-transform duration-300">
-            <Icons.ArrowLeft />
-          </span>
-          <span className="ml-2 tracking-widest uppercase text-xs font-bold whitespace-nowrap">Voltar às compras</span>
-        </button>
+      <div className="min-h-screen bg-[#050505] text-[#e5e5e5] px-6 pt-24 pb-6 md:px-12 md:pt-28 md:pb-12 fade-in selection:bg-[#DDAF02]/30">
+        <div className="max-w-7xl mx-auto">
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Image Glass Panel */}
-          <div className="glass-panel p-8 md:p-12 rounded-[2rem] flex justify-center animate-in shadow-2xl relative" style={{ animationDelay: '0.1s' }}>
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#DDAF02]/10 to-transparent rounded-[2rem] pointer-events-none" />
-            <img 
-              src={selectedProduct.image} 
-              alt={selectedProduct.title}
-              className="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] mix-blend-screen bg-white rounded-2xl p-6"
-            />
-          </div>
-          
-          {/* Product Info */}
-          <div className="space-y-8 animate-in" style={{ animationDelay: '0.2s' }}>
-            <div>
-              <span className="text-[#DDAF02] bg-[#DDAF02]/10 px-3 py-1 rounded-full border border-[#DDAF02]/20 uppercase tracking-[0.2em] text-xs font-bold inline-block mb-6">
-                {selectedProduct.category}
-              </span>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight">
-                {selectedProduct.title}
-              </h1>
+          {/* Navigation */}
+          <button 
+            onClick={() => setSelectedProduct(null)}
+            className="flex items-center text-neutral-400 hover:text-white transition-colors mb-8 md:mb-12 group w-min"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform duration-300">
+              <Icons.ArrowLeft />
+            </span>
+            <span className="ml-2 tracking-widest uppercase text-xs font-bold whitespace-nowrap">Voltar às compras</span>
+          </button>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center">
+            {/* Image Glass Panel */}
+            <div className="glass-panel p-8 md:p-12 rounded-[2rem] flex justify-center animate-in shadow-2xl relative" style={{ animationDelay: '0.1s' }}>
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#DDAF02]/10 to-transparent rounded-[2rem] pointer-events-none" />
+              <img 
+                src={selectedProduct.image} 
+                alt={selectedProduct.title}
+                className="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] mix-blend-screen bg-white rounded-2xl p-6"
+              />
             </div>
             
-            <p className="text-neutral-400 text-lg leading-relaxed font-light">
-              {selectedProduct.description}
-            </p>
-            
-            <div className="pt-4 flex items-center justify-between border-b border-white/10 pb-8">
-              <span className="text-5xl md:text-6xl font-bold text-white drop-shadow-md">
-                R$ {selectedProduct.price.toFixed(2)}
-              </span>
-              <div className="flex items-center gap-2 text-[#DDAF02]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span className="font-bold text-lg">{selectedProduct.rating.rate} <span className="text-neutral-500 font-normal text-sm">({selectedProduct.rating.count} avaliações)</span></span>
+            {/* Product Info */}
+            <div className="space-y-6 md:space-y-8 animate-in" style={{ animationDelay: '0.2s' }}>
+              <div>
+                <span className="text-[#DDAF02] bg-[#DDAF02]/10 px-3 py-1 rounded-full border border-[#DDAF02]/20 uppercase tracking-[0.2em] text-xs font-bold inline-block mb-4 md:mb-6">
+                  {selectedProduct.category}
+                </span>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight">
+                  {selectedProduct.title}
+                </h1>
+              </div>
+              
+              <p className="text-neutral-400 text-base md:text-lg leading-relaxed font-light">
+                {selectedProduct.description}
+              </p>
+              
+              <div className="pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-8">
+                <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-md whitespace-nowrap">
+                  R$ {selectedProduct.price.toFixed(2)}
+                </span>
+                <div className="flex items-center gap-2 text-[#DDAF02]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  <span className="font-bold text-lg">{selectedProduct.rating.rate} <span className="text-neutral-500 font-normal text-sm">({selectedProduct.rating.count} avaliações)</span></span>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <button 
+                  onClick={handleBuy} 
+                  className="btn-shimmer-wrap group cursor-pointer w-full sm:w-auto"
+                  aria-label="Comprar Agora"
+                >
+                  <span className="btn-shimmer-content bg-neutral-900 group-hover:bg-black transition-colors">
+                    <span className="btn-shimmer-effect"></span>
+                    <span className="relative z-10 flex items-center text-lg font-bold tracking-wider uppercase text-white group-hover:text-[#DDAF02] transition-colors">
+                      <Icons.ShoppingBag className="mr-3" />
+                      Finalizar Compra
+                    </span>
+                  </span>
+                </button>
               </div>
             </div>
-
-            <div className="pt-4">
-              <button 
-                onClick={handleBuy} 
-                className="btn-shimmer-wrap group cursor-pointer w-full sm:w-auto"
-                aria-label="Comprar Agora"
-              >
-                <span className="btn-shimmer-content bg-neutral-900 group-hover:bg-black transition-colors">
-                  <span className="btn-shimmer-effect"></span>
-                  <span className="relative z-10 flex items-center text-lg font-bold tracking-wider uppercase text-white group-hover:text-[#DDAF02] transition-colors">
-                    <Icons.ShoppingBag className="mr-3" />
-                    Finalizar Compra
-                  </span>
-                </span>
-              </button>
-            </div>
           </div>
+
         </div>
       </div>
     );
@@ -221,7 +224,7 @@ export default function EcommerceHomepage() {
       
 
       {/* Hero Section */}
-      <section className="relative w-full h-[100dvh] md:h-screen overflow-hidden">
+      <section className="relative w-full h-[100dvh] md:h-screen overflow-hidden mt-[80px] md:mt-0">
         {/* Background glow base */}
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505] pointer-events-none" />
         

@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const parsed = addToCartSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid payload", details: parsed.error.flatten() },
@@ -66,7 +66,7 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     const parsed = updateCartSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid payload", details: parsed.error.flatten() },
@@ -79,7 +79,7 @@ export async function PATCH(req: Request) {
       parsed.data.variantID,
       parsed.data.quantity
     );
-    
+
     return NextResponse.json(updatedItem, { status: 200 });
   } catch (error: any) {
     console.error("[CART_PATCH_ERROR]", error);
