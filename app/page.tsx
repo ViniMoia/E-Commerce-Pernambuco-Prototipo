@@ -221,56 +221,56 @@ export default function EcommerceHomepage() {
       
 
       {/* Hero Section */}
-      <section className="relative w-full h-[90vh] md:h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative w-full h-[100dvh] md:h-screen overflow-hidden">
         {/* Background glow base */}
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505] pointer-events-none" />
         
         {heroProducts.map((prod, idx) => (
           <div 
             key={`hero-${prod.id}`} 
-            className={`absolute inset-0 flex flex-col md:flex-row items-center justify-center p-6 md:p-24 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${idx === heroIndex ? 'opacity-100 z-10 scale-100 blur-0' : 'opacity-0 z-0 scale-105 blur-lg pointer-events-none'} max-[1500px]:pt-32`}
+            className={`absolute inset-0 flex flex-col md:flex-row items-center justify-center px-6 py-20 md:p-24 gap-8 md:gap-16 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-y-auto md:overflow-visible hide-scrollbar ${idx === heroIndex ? 'opacity-100 z-10 scale-100 blur-0' : 'opacity-0 z-0 scale-105 blur-lg pointer-events-none'}`}
           >
             {/* Visual Subject */}
-            <div className="w-full md:w-1/2 flex justify-center mt-24 md:mt-0 relative">
-               <div className="relative w-64 h-64 md:w-[32rem] md:h-[32rem] glass-panel rounded-full flex items-center justify-center p-12 shadow-2xl group max-[1500px]:w-[24rem] max-[1500px]:h-[24rem] max-[1500px]:p-8">
-                  <div className="absolute inset-0 bg-[#DDAF02]/20 rounded-full blur-[80px] -z-10 animate-pulse mix-blend-screen" />
+            <div className="w-full md:w-1/2 flex justify-center shrink-0 mt-8 md:mt-0 relative">
+               <div className="relative w-full max-w-[16rem] md:max-w-[32rem] aspect-square glass-panel rounded-full flex items-center justify-center p-6 md:p-12 shadow-2xl group">
+                  <div className="absolute inset-0 bg-[#DDAF02]/20 rounded-full blur-[60px] md:blur-[80px] -z-10 animate-pulse mix-blend-screen" />
                   <img 
                     src={prod.image} 
                     alt={prod.title} 
-                    className="max-h-full object-contain mix-blend-screen bg-transparent rounded-3xl p-4 drop-shadow-[0_30px_30px_rgba(255,255,255,0.1)] transition-transform duration-[2000ms] hover:scale-110" 
+                    className="w-full h-48 md:h-full max-h-[400px] object-contain mix-blend-screen bg-transparent rounded-3xl drop-shadow-[0_20px_20px_rgba(255,255,255,0.1)] transition-transform duration-[2000ms] hover:scale-110" 
                   />
                </div>
             </div>
 
             {/* Typography Content */}
-            <div className="w-full md:w-1/2 mt-12 md:mt-0 flex flex-col justify-center space-y-6 md:space-y-8 z-20 md:pl-12 max-[1500px]:space-y-4 max-[1500px]:pl-8">
+            <div className="w-full md:w-1/2 flex flex-col justify-center space-y-4 md:space-y-8 z-20 pb-24 md:pb-0">
               <div className="relative">
                 <div className="absolute -left-6 top-2 bottom-2 w-1 bg-[#DDAF02] rounded-full hidden md:block" />
-                <span className="text-xs uppercase tracking-[0.3em] font-mono text-[#DDAF02] font-bold max-[1500px]:text-[10px]">
+                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-mono text-[#DDAF02] font-bold">
                   Destaque Premium {idx + 1} / 5
                 </span>
-                <h2 className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tighter mt-4 leading-[1.1] line-clamp-3 max-[1500px]:!text-5xl max-[1500px]:mt-2">
+                <h2 className="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-semibold text-white tracking-tighter mt-2 md:mt-4 leading-tight line-clamp-2 md:line-clamp-3">
                   {prod.title}
                 </h2>
               </div>
               
-              <p className="text-neutral-400 text-sm md:text-lg font-light max-w-xl line-clamp-2 leading-relaxed max-[1500px]:text-sm">
+              <p className="text-neutral-400 text-sm md:text-lg font-light max-w-xl line-clamp-3 leading-relaxed">
                 {prod.description}
               </p>
               
-              <div className="flex items-center gap-6 pt-4">
-                <button onClick={() => setSelectedProduct(prod)} className="btn-shimmer-wrap group cursor-pointer">
-                  <span className="btn-shimmer-content py-4 px-8 bg-neutral-950">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 pt-2 md:pt-4">
+                <button onClick={() => setSelectedProduct(prod)} className="btn-shimmer-wrap group cursor-pointer w-full sm:w-auto">
+                  <span className="btn-shimmer-content py-3 md:py-4 px-6 md:px-8 bg-neutral-950 w-full flex justify-center">
                     <span className="btn-shimmer-effect"></span>
-                    <span className="relative z-10 flex items-center text-sm font-bold tracking-widest uppercase text-white group-hover:text-[#DDAF02] transition-colors">
+                    <span className="relative z-10 flex items-center text-xs md:text-sm font-bold tracking-widest uppercase text-white group-hover:text-[#DDAF02] transition-colors">
                       Ver Oferta
                       <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
                   </span>
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-xs text-neutral-500 uppercase tracking-widest">Valor</span>
-                  <span className="text-3xl md:text-4xl font-bold text-white tracking-tight">R$ {prod.price.toFixed(2)}</span>
+                  <span className="text-[10px] md:text-xs text-neutral-500 uppercase tracking-widest">Valor</span>
+                  <span className="text-2xl md:text-4xl font-bold text-white tracking-tight">R$ {prod.price.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -278,12 +278,12 @@ export default function EcommerceHomepage() {
         ))}
 
         {/* Carousel Indicators/Dots */}
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-4 z-30">
+        <div className="absolute bottom-6 md:bottom-8 left-0 right-0 flex justify-center items-center gap-3 z-30 pointer-events-auto">
           {heroProducts.map((_, idx) => (
             <button 
               key={idx}
               onClick={() => setHeroIndex(idx)}
-              className={`h-1.5 rounded-full transition-all duration-[600ms] cubic-bezier(0.16,1,0.3,1) ${idx === heroIndex ? 'w-16 bg-[#DDAF02] shadow-[0_0_10px_rgba(221,175,2,0.8)]' : 'w-4 bg-white/20 hover:bg-white/50'}`}
+              className={`h-1.5 rounded-full transition-all duration-[600ms] cubic-bezier(0.16,1,0.3,1) ${idx === heroIndex ? 'w-12 md:w-16 bg-[#DDAF02] shadow-[0_0_10px_rgba(221,175,2,0.8)]' : 'w-3 md:w-4 bg-white/20 hover:bg-white/50'}`}
               aria-label={`Ir para destaque ${idx + 1}`}
             />
           ))}

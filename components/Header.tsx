@@ -2,24 +2,34 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { User, LogOut } from "lucide-react";
 import { CartButton } from "./cart/CartButton";
+import { MobileMenu } from "./MobileMenu";
 
 export async function Header() {
   const user = await getCurrentUser();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] px-6 md:px-12 py-6 flex justify-between items-center pointer-events-none max-[1500px]:py-4">
-      {/* Brand */}
+    <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 flex justify-between items-center pointer-events-none md:px-12 max-[1500px]:py-4">
+      {/* Brand Logo (Visible on all sizes) */}
       <div className="pointer-events-auto backdrop-blur-md bg-black/40 px-6 py-3 rounded-full border border-white/10 flex items-center max-[1500px]:px-4 max-[1500px]:py-2">
         <Link href="/">
           <h1 className="text-lg md:text-md font-bold tracking-widest text-white uppercase drop-shadow-md flex items-center gap-2 max-[1500px]:text-xs">
             <span className="w-2.5 h-2.5 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02] max-[1500px]:w-2 max-[1500px]:h-2"></span>
-            Pernambuco Confecções
+            <span className="hidden sm:inline">Pernambuco Confecções</span>
+            <span className="sm:hidden">Pernambuco</span>
           </h1>
         </Link>
       </div>
 
-      {/* Auth & Cart Navigation */}
-      <nav className="pointer-events-auto flex items-center gap-4 max-[1500px]:gap-2">
+      {/* Mobile Actions (Visible only on mobile: < 768px) */}
+      <div className="md:hidden pointer-events-auto flex items-center gap-3">
+        <div className="bg-black/40 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center justify-center">
+          <CartButton />
+        </div>
+        <MobileMenu user={user} />
+      </div>
+
+      {/* Desktop Auth & Cart Navigation (Hidden on mobile) */}
+      <nav className="pointer-events-auto hidden md:flex items-center gap-4 max-[1500px]:gap-2">
         <div className="bg-black/40 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center justify-center">
           <CartButton />
         </div>
@@ -33,7 +43,7 @@ export async function Header() {
                   <span className="text-[#DDAF02] text-xs font-bold">{user.name.substring(0, 2).toUpperCase()}</span>
                 )}
               </div>
-              <span className="text-white text-sm font-medium hidden md:block">{user.name}</span>
+              <span className="text-white text-sm font-medium">{user.name}</span>
             </Link>
             
             <div className="w-px h-6 bg-white/10 mx-2"></div>
