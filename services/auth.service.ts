@@ -1,5 +1,5 @@
 import  prisma  from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { LoginInput } from "@/lib/validators/auth";
 
 export async function registerUser(data: {
