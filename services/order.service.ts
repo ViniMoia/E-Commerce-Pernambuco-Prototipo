@@ -11,9 +11,10 @@
 
 import prisma from "@/lib/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
+import { isValidTransition } from "@/lib/order-transitions";
+import type { ListOrdersParams, UpdateOrderStatusInput, UpdateStatusResult } from "@/types/admin.types";
 import type {
   CreateOrderInput,
-  UpdateOrderStatusInput,
   OrderWithDetails,
   OrderSummary,
 } from "@/types/order.types";
@@ -187,124 +188,7 @@ export async function createOrderFromCart(
   return order as OrderWithDetails;
 }
 
-// ─── 2. ATUALIZAR STATUS DO PEDIDO ────────────────────────────────────────────
 
-/**
- * Atualiza o status de um pedido, gerenciando o estoque nas transições críticas.
- *
- * Transições com efeito colateral no estoque:
- *   PENDING → PAID      : Deduz estoque de cada ProductVariant
- *   PAID    → CANCELLED : Devolve estoque (rollback)
- *   Demais              : Apenas atualiza o status
- */
-export async function updateOrderStatus(
-  input: UpdateOrderStatusInput
-): Promise<void> {
-  const { orderID, newStatus } = input;
-
-  // Busca o pedido com seus itens para conhecer o status atual e as quantidades
-  const order = await prisma.order.findUnique({
-    where: { id: orderID },
-    include: { items: true },
-  });
-
-  if (!order) {
-    throw new OrderError("ORDER_NOT_FOUND");
-  }
-
-  const currentStatus = order.status;
-
-  // Evita reprocessamento: idempotência básica
-  if (currentStatus === newStatus) {
-    return;
-  }
-
-  // ── Transição PAID: deduzir estoque ──────────────────────────────────────
-  if (newStatus === "PAID") {
-    /**
-     * POR QUE validar estoque ANTES da transação?
-     *
-     * Fazemos uma pré-validação para dar feedback rápido e evitar que a
-     * transação seja aberta e revertida desnecessariamente.
-     * Dentro da transação, o Prisma/PostgreSQL garante a atomicidade final.
-     *
-     * ⚠️  ARMADILHA - ESTOQUE NEGATIVO:
-     * Se usássemos `decrement` sem verificar, poderíamos criar estoque negativo.
-     * A solução correta é filtrar na cláusula `where` da atualização:
-     *   where: { id: variantID, stock: { gte: quantity } }
-     * Se nenhum registro for encontrado (estoque insuficiente), o Prisma
-     * lança P2025 (RecordNotFound) e a transação inteira é revertida.
-     */
-    const variantStockChecks = await prisma.productVariants.findMany({
-      where: {
-        id: { in: order.items.map((i) => i.variantID) },
-      },
-      select: { id: true, stock: true, size: true, color: true },
-    });
-
-    // Monta um mapa para lookup O(1)
-    const stockMap = new Map(variantStockChecks.map((v) => [v.id, v.stock]));
-
-    for (const item of order.items) {
-      const available = stockMap.get(item.variantID) ?? 0;
-      if (available < item.quantity) {
-        throw new OrderError(
-          `INSUFFICIENT_STOCK:${item.variantID}:available=${available}:required=${item.quantity}`
-        );
-      }
-    }
-
-    // Executa a dedução e a atualização de status atomicamente
-    await prisma.$transaction([
-      // Decrementa o estoque de cada variante somente se houver stock suficiente.
-      // O filtro `stock: { gte: item.quantity }` é a proteção contra race condition:
-      // se outro processo consumiu o estoque entre a verificação acima e esta linha,
-      // o `where` não encontrará o registro e o Prisma lançará P2025 → ROLLBACK.
-      ...order.items.map((item) =>
-        prisma.productVariants.update({
-          where: {
-            id: item.variantID,
-            stock: { gte: item.quantity }, // ← guarda de segurança anti-negativo
-          },
-          data: { stock: { decrement: item.quantity } },
-        })
-      ),
-
-      // Atualiza o status do pedido
-      prisma.order.update({
-        where: { id: orderID },
-        data: { status: newStatus },
-      }),
-    ]);
-
-    return;
-  }
-
-  // ── Transição CANCELLED (vindo de PAID): devolver estoque ────────────────
-  if (newStatus === "CANCELLED" && currentStatus === "PAID") {
-    await prisma.$transaction([
-      ...order.items.map((item) =>
-        prisma.productVariants.update({
-          where: { id: item.variantID },
-          data: { stock: { increment: item.quantity } },
-        })
-      ),
-
-      prisma.order.update({
-        where: { id: orderID },
-        data: { status: newStatus },
-      }),
-    ]);
-
-    return;
-  }
-
-  // ── Demais transições: apenas atualizar o status ──────────────────────────
-  await prisma.order.update({
-    where: { id: orderID },
-    data: { status: newStatus },
-  });
-}
 
 // ─── 3. BUSCAR PEDIDO POR ID ──────────────────────────────────────────────────
 
@@ -364,4 +248,153 @@ export async function getOrdersByUser(
   });
 
   return orders as OrderSummary[];
+}
+export async function listOrdersForAdmin(params: ListOrdersParams) {
+  const where: any = {};
+  if (params.status) {
+    where.status = params.status;
+  }
+  if (params.dateFrom || params.dateTo) {
+    where.createdAt = {};
+    if (params.dateFrom) where.createdAt.gte = params.dateFrom;
+    if (params.dateTo) where.createdAt.lte = params.dateTo;
+  }
+  if (params.search) {
+    where.OR = [
+      { user: { name: { contains: params.search, mode: 'insensitive' } } },
+      { user: { email: { contains: params.search, mode: 'insensitive' } } },
+    ];
+  }
+  const pageSize = params.pageSize ?? 20;
+  const [orders, totalCount] = await prisma.$transaction([
+    prisma.order.findMany({
+      where,
+      take: pageSize + 1,
+      cursor: params.cursor ? { id: params.cursor } : undefined,
+      skip: params.cursor ? 1 : undefined,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        total: true,
+        createdAt: true,
+        user: { select: { id: true, name: true, email: true } },
+        _count: { select: { items: true } },
+      },
+    }),
+    prisma.order.count({ where }),
+  ]);
+  const hasNextPage = orders.length > pageSize;
+  const data = hasNextPage ? orders.slice(0, pageSize) : orders;
+  const nextCursor = hasNextPage ? data[data.length - 1].id : null;
+  return { data, totalCount, nextCursor, hasNextPage };
+}
+
+export async function getOrderDetailForAdmin(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: { select: { id: true, name: true, email: true, phone: true } },
+      address: true,
+      items: {
+        select: {
+          id: true,
+          quantity: true,
+          productName: true,
+          size: true,
+          color: true,
+          price: true
+        }
+      }
+    }
+  })
+  return order
+}
+
+export async function updateOrderStatus(
+  input: UpdateOrderStatusInput
+): Promise<UpdateStatusResult> {
+  const fullOrder = await prisma.order.findUnique({
+    where: { id: input.orderId },
+    select: { id: true, status: true, userID: true, items: true }
+  })
+
+  if (!fullOrder) {
+    return { success: false, error: 'Pedido não encontrado.', code: 'NOT_FOUND' }
+  }
+
+  if (!isValidTransition(fullOrder.status, input.newStatus)) {
+    return { success: false, error: 'Transição de status inválida.', code: 'INVALID_TRANSITION' }
+  }
+
+  const auditEntry = prisma.auditLog.create({
+    data: {
+      actorId: input.performedById,
+      targetId: fullOrder.userID,
+      action: 'ORDER_STATUS_UPDATED',
+      entity: 'Order',
+      entityId: input.orderId,
+      previousValue: { status: fullOrder.status },
+      newValue: { status: input.newStatus },
+      ipAddress: input.ipAddress ?? null
+    }
+  })
+
+  if (input.newStatus === 'PAID') {
+    const variantStockChecks = await prisma.productVariants.findMany({
+      where: { id: { in: fullOrder.items.map((i) => i.variantID) } },
+      select: { id: true, stock: true },
+    })
+    const stockMap = new Map(variantStockChecks.map((v) => [v.id, v.stock]))
+    for (const item of fullOrder.items) {
+      const available = stockMap.get(item.variantID) ?? 0
+      if (available < item.quantity) {
+        return { success: false, error: `Estoque insuficiente para a variante ${item.variantID}.`, code: 'INVALID_TRANSITION' }
+      }
+    }
+    const [updatedOrder] = await prisma.$transaction([
+      prisma.order.update({
+        where: { id: input.orderId },
+        data: { status: input.newStatus },
+        select: { id: true, status: true }
+      }),
+      ...fullOrder.items.map((item) =>
+        prisma.productVariants.update({
+          where: { id: item.variantID, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        })
+      ),
+      auditEntry
+    ])
+    return { success: true, order: updatedOrder }
+  }
+
+  if (input.newStatus === 'CANCELLED' && fullOrder.status === 'PAID') {
+    const [updatedOrder] = await prisma.$transaction([
+      prisma.order.update({
+        where: { id: input.orderId },
+        data: { status: input.newStatus },
+        select: { id: true, status: true }
+      }),
+      ...fullOrder.items.map((item) =>
+        prisma.productVariants.update({
+          where: { id: item.variantID },
+          data: { stock: { increment: item.quantity } },
+        })
+      ),
+      auditEntry
+    ])
+    return { success: true, order: updatedOrder }
+  }
+
+  const [updatedOrder] = await prisma.$transaction([
+    prisma.order.update({
+      where: { id: input.orderId },
+      data: { status: input.newStatus },
+      select: { id: true, status: true }
+    }),
+    auditEntry
+  ])
+
+  return { success: true, order: updatedOrder }
 }
