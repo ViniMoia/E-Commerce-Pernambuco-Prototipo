@@ -1,8 +1,12 @@
 import prisma from "@/lib/prisma";
 import type { ListCustomersParams, CustomerMetrics } from "@/types/admin.types";
+import type { Prisma } from "@prisma/client";
 
 export async function listCustomers(params: ListCustomersParams) {
-  const where: any = { role: 'CUSTOMER' };
+  const where: Prisma.UserWhereInput = {
+    role: 'CUSTOMER',
+    ...(params.lojaID ? { lojaID: params.lojaID } : {})
+  };
 
   if (params.search) {
     where.OR = [

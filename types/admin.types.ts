@@ -7,7 +7,10 @@ export type ListOrdersParams = {
   dateFrom?: Date;
   dateTo?: Date;
   cursor?: string;
+  lojaID?: string;
 };
+
+
 
 export type UpdateOrderStatusInput = {
   orderId: string;
@@ -24,6 +27,7 @@ export type ListCustomersParams = {
   pageSize?: number;
   search?: string;
   cursor?: string;
+  lojaID?: string;
 };
 
 export type CustomerMetrics = {

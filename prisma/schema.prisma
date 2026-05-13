@@ -22,6 +22,7 @@ model Loja {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   user          User[]
+  orders        Order[]
   products      Product[]
 }
 
@@ -183,6 +184,8 @@ model Order {
   userID       String
   user         User        @relation(fields: [userID], references: [id])
   addressID    String
+  lojaID       String
+  loja         Loja        @relation(fields: [lojaID], references: [id])
   address      Address     @relation(fields: [addressID], references: [id])
   status       OrderStatus @default(PENDING)
   subtotal     Decimal     @db.Decimal(10, 2)

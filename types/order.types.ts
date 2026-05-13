@@ -6,6 +6,7 @@ export interface CreateOrderInput {
   userID: string;
   cartID: string;
   addressID: string;
+  lojaID: string;
 }
 
 export interface UpdateOrderStatusInput {

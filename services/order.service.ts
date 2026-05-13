@@ -50,7 +50,7 @@ export class OrderError extends Error {
 export async function createOrderFromCart(
   input: CreateOrderInput
 ): Promise<OrderWithDetails> {
-  const { userID, cartID, addressID } = input;
+  const { userID, cartID, addressID, lojaID } = input;
 
   // ── Pré-validações fora da transação (leituras rápidas) ───────────────────
   // Busca o carrinho com seus itens em uma única query (evita N+1)
@@ -136,6 +136,7 @@ export async function createOrderFromCart(
         subtotal,
         shippingCost: shippingCostDecimal,
         total,
+        lojaID,
         // Cria os OrderItems em nested write (mais eficiente que múltiplos creates)
         items: {
           createMany: {
@@ -250,7 +251,9 @@ export async function getOrdersByUser(
   return orders as OrderSummary[];
 }
 export async function listOrdersForAdmin(params: ListOrdersParams) {
-  const where: any = {};
+  const where: Prisma.OrderWhereInput = {
+    ...(params.lojaID ? { lojaID: params.lojaID } : {})
+  };
   if (params.status) {
     where.status = params.status;
   }
