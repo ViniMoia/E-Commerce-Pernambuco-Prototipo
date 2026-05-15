@@ -1,22 +1,27 @@
-import { NextResponse } from 'next/server';
-import { ok, err } from '@/lib/api-response';
 import { requireAdmin } from '@/lib/auth-admin';
-import { listCustomersQuerySchema } from '@/lib/validators/customer.validators';
-import { listCustomers } from '@/services/customer.service';
+import { listCustomersSchema } from '@/lib/validators/customer.validators';
+import { listCustomers } from '@/lib/services/customer.service';
+import { ok } from '@/lib/api-response';
+import { NextRequest } from 'next/server';
 
-export async function GET(req: Request) {
-  const auth = await requireAdmin(req);
-  if (auth instanceof NextResponse) return auth;
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) {
+    return auth;
+  }
 
-  const parsed = listCustomersQuerySchema.safeParse(
-    Object.fromEntries(new URL(req.url).searchParams)
-  );
-  if (!parsed.success) return err('Parâmetros inválidos.', 400, 'VALIDATION_ERROR');
+  const { searchParams } = new URL(request.url);
+  const queryParams = Object.fromEntries(searchParams.entries());
+  const result = listCustomersSchema.safeParse(queryParams);
 
-  return ok(
-    await listCustomers({
-      ...parsed.data,
-      lojaID: auth.user.lojaID,
-    })
-  );
+  if (!result.success) {
+    return new Response('Parâmetros de consulta inválidos.', { status: 400 });
+  }
+
+  const customers = await listCustomers({
+    lojaID: auth.user.lojaID,
+    ...result.data
+  });
+
+  return ok(customers);
 }

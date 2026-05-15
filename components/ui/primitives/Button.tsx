@@ -6,7 +6,7 @@ import { Spinner } from './Spinner'
 import { cn } from '@/lib/utils'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   leftIcon?: React.ReactNode
@@ -35,6 +35,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700 shadow-sm',
       danger: 'bg-red-500 text-white hover:bg-red-600 border-transparent shadow-sm',
       ghost: 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white',
+      outline: 'bg-transparent text-zinc-300 border border-zinc-700 hover:bg-white/10 hover:text-white',
     }
 
     const sizeClasses = {

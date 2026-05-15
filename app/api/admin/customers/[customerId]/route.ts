@@ -1,30 +1,31 @@
-import { NextResponse } from 'next/server';
-import { ok, err } from '@/lib/api-response';
 import { requireAdmin } from '@/lib/auth-admin';
-import { getCustomerProfile } from '@/services/customer.service';
+import { customerIdSchema } from '@/lib/validators/customer.validators';
+import { getCustomerProfile } from '@/lib/services/customer.service';
+import { ok, err } from '@/lib/api-response';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  req: Request,
+  request: NextRequest,
   { params }: { params: { customerId: string } }
 ) {
-  const auth = await requireAdmin(req);
-  if (auth instanceof NextResponse) return auth;
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) {
+    return auth;
+  }
 
-  const profile = await getCustomerProfile(params.customerId);
-  if (!profile) return err('Cliente não encontrado.', 404, 'NOT_FOUND');
+  const result = customerIdSchema.safeParse(params);
+  if (!result.success) {
+    return err('ID do cliente inválido.', 400);
+  }
 
-  const serialized = {
-    ...profile,
-    metrics: {
-      ...profile.metrics,
-      totalSpent: Number(profile.metrics.totalSpent),
-      averageTicket: Number(profile.metrics.averageTicket),
-    },
-    orders: profile.orders.map((o) => ({
-      ...o,
-      total: o.total.toNumber(),
-    })),
-  };
+  const customer = await getCustomerProfile({
+    customerId: result.data.customerId,
+    lojaID: auth.user.lojaID
+  });
 
-  return ok(serialized);
+  if (!customer) {
+    return err('Cliente não encontrado.', 404);
+  }
+
+  return ok(customer);
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
 
 export interface AlertBannerProps {
+  title?: string
   message: string
   variant: 'success' | 'error' | 'warning' | 'info'
   onDismiss?: () => void
@@ -42,6 +43,7 @@ const VariantIcons = {
 }
 
 export function AlertBanner({
+  title,
   message,
   variant,
   onDismiss,
@@ -67,11 +69,18 @@ export function AlertBanner({
         className
       )}
     >
-      <div className="flex items-center gap-3">
-        {VariantIcons[variant]}
-        <AlertDescription className="text-sm font-medium leading-relaxed m-0">
-          {message}
-        </AlertDescription>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5">{VariantIcons[variant]}</span>
+        <div className="flex flex-col gap-0.5">
+          {title && (
+            <AlertTitle className="text-sm font-semibold leading-snug m-0">
+              {title}
+            </AlertTitle>
+          )}
+          <AlertDescription className="text-sm font-medium leading-relaxed m-0">
+            {message}
+          </AlertDescription>
+        </div>
       </div>
       
       {onDismiss ? (
