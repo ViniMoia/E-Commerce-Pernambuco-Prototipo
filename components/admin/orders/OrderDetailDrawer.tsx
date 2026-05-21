@@ -25,7 +25,12 @@ export interface OrderDetail {
   trackingCode: string | null
   adminNotes: string | null
   paymentMethod: string | null
-  customer: {
+  customer?: {
+    name: string
+    email: string
+    phone: string | null
+  }
+  user?: {
     name: string
     email: string
     phone: string | null
@@ -224,10 +229,10 @@ export function OrderDetailDrawer({ orderId, onClose, onStatusUpdate }: OrderDet
                   Cliente
                 </h3>
                 <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 shadow-sm border border-zinc-200 dark:border-white/5">
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">{order.customer.name}</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{order.customer.email}</p>
-                  {order.customer.phone && (
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{order.customer.phone}</p>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">{order.customer?.name || order.user?.name || 'Cliente desconhecido'}</p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{order.customer?.email || order.user?.email}</p>
+                  {(order.customer?.phone || order.user?.phone) && (
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{order.customer?.phone || order.user?.phone}</p>
                   )}
                 </div>
               </section>
@@ -408,7 +413,7 @@ export function OrderDetailDrawer({ orderId, onClose, onStatusUpdate }: OrderDet
                   Histórico de Status
                 </h3>
                 <div className="relative pl-4 space-y-6 pt-2 before:absolute before:inset-y-0 before:left-[11px] before:w-[2px] before:bg-zinc-200 dark:before:bg-white/10">
-                  {order.statusHistory.map((history, idx) => (
+                  {(order.statusHistory || []).map((history, idx) => (
                     <div key={history.id} className="relative">
                       <div className="absolute -left-6 w-3 h-3 rounded-full bg-[#dbb501] ring-4 ring-zinc-50 dark:ring-zinc-950 mt-1.5" />
                       <div>

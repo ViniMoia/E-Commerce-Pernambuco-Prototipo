@@ -36,7 +36,11 @@ const statusConfig: Record<OrderStatus, { label: string; className: string }> = 
 }
 
 export function Badge({ status, size = 'sm', className }: BadgeProps) {
-  const config = statusConfig[status]
+  const normalizedStatus = status?.toUpperCase() as OrderStatus
+  const config = statusConfig[normalizedStatus] || { 
+    label: status || 'Desconhecido', 
+    className: 'bg-zinc-100 text-zinc-900 border-zinc-200' 
+  }
   const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm'
   
   return (

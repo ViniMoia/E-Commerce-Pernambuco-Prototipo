@@ -29,7 +29,7 @@ const typographyClasses = {
 
 export const Avatar = React.forwardRef<React.ElementRef<typeof ShadcnAvatar>, AvatarProps>(
   ({ name, src, size = 'md', className }, ref) => {
-    const initial = name
+    const initial = (name || '?')
       .trim()
       .substring(0, 1)
       .toUpperCase()

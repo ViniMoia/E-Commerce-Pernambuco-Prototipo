@@ -23,6 +23,7 @@ const addressSchema = z.object({
   street: z.string().min(2),
   number: z.string().min(1),
   complement: z.string().optional(),
+  cep: z.string().regex(/^\d{5}-?\d{3}$/, 'CEP inválido'),
 })
 
 export const createOrderSchema = z.object({

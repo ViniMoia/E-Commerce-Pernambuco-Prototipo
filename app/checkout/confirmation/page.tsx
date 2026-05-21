@@ -18,7 +18,7 @@ interface ConfirmationOrder {
   whatsappNumber: string
 }
 
-export function CheckoutConfirmationPage() {
+export default function CheckoutConfirmationPage() {
   const router = useRouter()
   const { clearCart } = useCartStore()
   const [order, setOrder] = useState<ConfirmationOrder | null>(null)
@@ -34,7 +34,6 @@ export function CheckoutConfirmationPage() {
     try {
       const data = JSON.parse(rawData) as ConfirmationOrder
       setOrder(data)
-      sessionStorage.removeItem('last_order')
       clearCart()
     } catch {
       router.push('/')
@@ -78,7 +77,7 @@ export function CheckoutConfirmationPage() {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-zinc-50 text-center mb-2 tracking-tight">
-          Pedido #{order.orderNumber} realizado com sucesso!
+          Pedido realizado com sucesso!
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 text-center mb-8">
           Falta pouco! Agora é só confirmar o pagamento pelo WhatsApp.

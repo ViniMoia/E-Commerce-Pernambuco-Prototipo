@@ -25,22 +25,32 @@ export default function OrdersPage() {
         throw new Error(errData.error || 'Erro ao carregar pedidos')
       }
       const json = await res.json()
-      if (json.success && Array.isArray(json.data)) {
+      
+      let ordersArray = null
+      if (json.success) {
+        if (Array.isArray(json.data)) ordersArray = json.data
+        else if (json.data && Array.isArray(json.data.data)) ordersArray = json.data.data
+        else if (json.data && Array.isArray(json.data.orders)) ordersArray = json.data.orders
+      } else if (Array.isArray(json)) {
+        ordersArray = json
+      }
+
+      if (ordersArray) {
         // Map to standard OrderRow shape
-        const mapped = json.data.map((o: any) => ({
+        const mapped = ordersArray.map((o: any) => ({
           id: o.id,
           orderNumber: parseInt(o.id.replace(/\D/g, '')) || 0, // Extract numeric part or default to 0
           createdAt: o.createdAt,
-          customerName: o.user?.name || 'Sem nome',
-          customerEmail: o.user?.email || '',
+          customerName: o.customer?.name || o.user?.name || 'Sem nome',
+          customerEmail: o.customer?.email || o.user?.email || '',
           status: o.status,
-          deliveryType: 'DELIVERY', // Default value since API doesn't return deliveryType
+          deliveryType: o.deliveryType || 'DELIVERY', // Use API value or default
           total: typeof o.total === 'number' ? o.total : parseFloat(o.total || '0'),
-          freightValue: null // Default to null since API doesn't return freightValue
+          freightValue: typeof o.freightValue === 'number' ? o.freightValue : parseFloat(o.freightValue || '0')
         }))
         setOrders(mapped)
       } else {
-        throw new Error('Formato de resposta inválido')
+        throw new Error('Formato inválido: ' + JSON.stringify(json).substring(0, 100))
       }
     } catch (err: unknown) {
       if (err instanceof Error) {

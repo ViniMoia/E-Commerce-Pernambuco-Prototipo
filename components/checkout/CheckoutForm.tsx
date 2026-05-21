@@ -38,7 +38,7 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState({
+     const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
@@ -49,7 +49,8 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
       neighborhood: '',
       street: '',
       number: '',
-      complement: ''
+      complement: '',
+      cep: ''
     }
   })
 
@@ -74,6 +75,14 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
     setFormData(prev => ({ ...prev, phone: val }))
   }
 
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, '')
+    if (val.length > 8) val = val.slice(0, 8)
+    if (val.length > 5) val = `${val.slice(0, 5)}-${val.slice(5)}`
+    setFormData(prev => ({ ...prev, address: { ...prev.address, cep: val } }))
+  }
+
+
   const validateStep1 = () => {
     if (!formData.name || formData.name.length < 2) return 'Nome deve ter pelo menos 2 caracteres.'
     if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) return 'Email inválido.'
@@ -83,13 +92,17 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
 
   const validateStep2 = () => {
     if (formData.deliveryType === 'DELIVERY') {
-      const { state, city, neighborhood, street, number } = formData.address
+      const { state, city, neighborhood, street, number, cep } = formData.address
       if (!state || !city || !neighborhood || !street || !number) {
         return 'Preencha todos os campos obrigatórios do endereço.'
+      }
+      if (!cep || !/^\d{5}-?\d{3}$/.test(cep)) {
+        return 'CEP inválido. Use o formato 00000-000.'
       }
     }
     return null
   }
+
 
   const nextStep = () => {
     setError(null)
@@ -122,8 +135,8 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
           phone: formData.phone.replace(/\D/g, '')
         },
         items: items.map((item: any) => ({
-          productId: item.productId || item.productID,
-          name: item.name || item.productName,
+          productId: item.productID || item.productId,
+          name: item.productName || item.name,
           quantity: item.quantity,
           price: item.price,
           color: item.color,
@@ -272,6 +285,18 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
                 </div>
               ) : (
                 <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">CEP</label>
+                    <input
+                      type="text"
+                      name="address.cep"
+                      value={formData.address.cep}
+                      onChange={handleCepChange}
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#dbb501]/50 focus:border-[#dbb501] transition-all"
+                      placeholder="00000-000"
+                      maxLength={9}
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Estado</label>
@@ -296,6 +321,7 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
                       />
                     </div>
                   </div>
+
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Bairro</label>
                     <input
@@ -352,7 +378,7 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
                   {items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
                       <span className="text-zinc-600 dark:text-zinc-400">
-                        {item.quantity}x {item.name}
+                        {item.quantity}x {(item as any).productName || item.name}
                       </span>
                       <span className="font-medium text-zinc-900 dark:text-zinc-100">
                         R$ {(item.price * item.quantity).toFixed(2)}

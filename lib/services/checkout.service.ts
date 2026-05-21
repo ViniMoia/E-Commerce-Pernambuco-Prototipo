@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Decimal } from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
 import prisma from '@/lib/prisma'
 
 interface CartItem {
@@ -24,6 +24,7 @@ interface AddressData {
   street: string
   number: string
   complement?: string
+  cep: string
 }
 
 interface CreateOrderParams {
@@ -78,24 +79,34 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
     userConnect = { id: upserted.id }
   }
 
-   const order = await prisma.$transaction(async (tx: PrismaClient) => {
+   const order = await prisma.$transaction(async (tx) => {
+     // Step 1: Create address first (if DELIVERY), then connect to order by ID
+     let addressConnect: { connect: { id: string } } | undefined = undefined
+
+     if (params.deliveryType === 'DELIVERY' && params.address) {
+       const createdAddress = await tx.address.create({
+         data: {
+           user: { connect: userConnect },
+           cep: params.address.cep,
+           state: params.address.state,
+           city: params.address.city,
+           district: params.address.neighborhood,
+           street: params.address.street,
+           number: params.address.number,
+           complement: params.address.complement,
+         },
+       })
+       addressConnect = { connect: { id: createdAddress.id } }
+     }
+
+     // Step 2: Create order connecting to existing address ID
      const created = await tx.order.create({
        data: {
          loja: { connect: { id: params.lojaID } },
          user: { connect: userConnect },
-         address: params.deliveryType === 'DELIVERY' && params.address ? {
-           create: {
-             state: params.address.state,
-             city: params.address.city,
-             district: params.address.neighborhood,
-             street: params.address.street,
-             number: params.address.number,
-             complement: params.address.complement,
-           },
-         } : undefined,
+         address: addressConnect,
          status: 'PENDING',
          paymentMethod: 'WHATSAPP_PIX',
-         pixKey: params.pixKey ?? null,
          pixKeyUsed: params.pixKey ?? null,
          freightValue: freight.equals(0) ? null : freight,
          subtotal: subtotal,
@@ -118,7 +129,6 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
          orderNumber: true,
          total: true,
          freightValue: true,
-         pixKey: true,
          pixKeyUsed: true,
          user: { select: { name: true, phone: true } },
          items: { select: { name: true, quantity: true, price: true, color: true, size: true } },
@@ -135,7 +145,7 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
       orderNumber: order.orderNumber,
       total: Number(order.total),
       freightValue: order.freightValue ? Number(order.freightValue) : null,
-      pixKey: order.pixKey,
+      pixKey: params.pixKey ?? null,
       customer: { name: order.user.name, phone: order.user.phone },
       items: order.items.map(i => ({
         productId: undefined,
