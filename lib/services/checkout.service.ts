@@ -78,53 +78,55 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
     userConnect = { id: upserted.id }
   }
 
-  const order = await prisma.$transaction(async (tx: PrismaClient) => {
-    const created = await tx.order.create({
-      data: {
-        lojaID: params.lojaID,
-        user: { connect: userConnect },
-        address: params.deliveryType === 'DELIVERY' && params.address ? {
-          create: {
-            state: params.address.state,
-            city: params.address.city,
-            district: params.address.neighborhood,
-            street: params.address.street,
-            number: params.address.number,
-            complement: params.address.complement,
-          },
-        } : undefined,
-        status: 'PENDING',
-        paymentMethod: 'WHATSAPP_PIX',
-        pixKey: params.pixKey ?? null,
-        freightValue: freight.equals(0) ? null : freight,
-        subtotal: subtotal,
-        shippingCost: new Decimal(0),
-        total: total,
-        deliveryType: params.deliveryType,
-        items: {
-          create: params.items.map(item => ({
-            product: item.productId ? { connect: { id: item.productId } } : undefined,
-            name: item.name,
-            quantity: item.quantity,
-            price: new Decimal(item.price),
-            color: item.color,
-            size: item.size,
-          })),
-        },
-      },
-      select: {
-        id: true,
-        orderNumber: true,
-        total: true,
-        freightValue: true,
-        pixKey: true,
-        user: { select: { name: true, phone: true } },
-        items: { select: { name: true, quantity: true, price: true, color: true, size: true } },
-        deliveryType: true,
-      },
-    })
-    return created
-  })
+   const order = await prisma.$transaction(async (tx: PrismaClient) => {
+     const created = await tx.order.create({
+       data: {
+         lojaID: params.lojaID,
+         user: { connect: userConnect },
+         address: params.deliveryType === 'DELIVERY' && params.address ? {
+           create: {
+             state: params.address.state,
+             city: params.address.city,
+             district: params.address.neighborhood,
+             street: params.address.street,
+             number: params.address.number,
+             complement: params.address.complement,
+           },
+         } : undefined,
+         status: 'PENDING',
+         paymentMethod: 'WHATSAPP_PIX',
+         pixKey: params.pixKey ?? null,
+         pixKeyUsed: params.pixKey ?? null,
+         freightValue: freight.equals(0) ? null : freight,
+         subtotal: subtotal,
+         shippingCost: new Decimal(0),
+         total: total,
+         deliveryType: params.deliveryType,
+         items: {
+           create: params.items.map(item => ({
+             product: item.productId ? { connect: { id: item.productId } } : undefined,
+             name: item.name,
+             quantity: item.quantity,
+             price: new Decimal(item.price),
+             color: item.color,
+             size: item.size,
+           })),
+         },
+       },
+       select: {
+         id: true,
+         orderNumber: true,
+         total: true,
+         freightValue: true,
+         pixKey: true,
+         pixKeyUsed: true,
+         user: { select: { name: true, phone: true } },
+         items: { select: { name: true, quantity: true, price: true, color: true, size: true } },
+         deliveryType: true,
+       },
+     })
+     return created
+   })
 
   return {
     success: true,

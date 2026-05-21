@@ -27,11 +27,13 @@ interface CartStore {
   addToCart: (variantID: string, productID: string, quantity: number) => Promise<void>;
   updateQuantity: (variantID: string, quantity: number) => Promise<void>;
   removeItem: (variantID: string) => Promise<void>;
+  clearCart: () => void;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   cart: null,
   isLoading: false,
+  clearCart: () => set({ cart: null }),
   fetchCart: async () => {
     set({ isLoading: true });
     try {
@@ -56,9 +58,15 @@ export const useCartStore = create<CartStore>((set, get) => ({
       });
       if (res.ok) {
         await get().fetchCart();
+      } else if (res.status === 401) {
+        window.location.href = "/login";
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to add to cart");
       }
     } catch (error) {
       console.error(error);
+      throw error;
     } finally {
       set({ isLoading: false });
     }

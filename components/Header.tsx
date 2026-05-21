@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
-import { User, LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { CartButton } from "./cart/CartButton";
 import { MobileMenu } from "./MobileMenu";
 
@@ -35,6 +35,22 @@ export async function Header() {
         </div>
         {user ? (
           <div className="flex items-center gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+            {/* Admin panel link — visible only for ADMIN role */}
+            {user.role === "ADMIN" && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 text-[#DDAF02] hover:text-white transition-colors text-sm font-medium tracking-wide"
+                title="Painel Admin"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="hidden lg:inline">Admin</span>
+              </Link>
+            )}
+
+            {user.role === "ADMIN" && (
+              <div className="w-px h-5 bg-white/10" />
+            )}
+
             <Link href="/profile" className="flex items-center gap-3 hover:text-[#DDAF02] transition-colors">
               <div className="w-8 h-8 rounded-full bg-[#DDAF02]/10 border border-[#DDAF02]/50 flex items-center justify-center overflow-hidden">
                 {user.avatarImageUrl ? (

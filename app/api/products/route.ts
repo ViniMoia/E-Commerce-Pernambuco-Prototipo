@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     // userId always comes from the verified session, never from the request body
     const product = await productService.createProduct({
       ...parsed.data,
-      userId: guard.user.id,
+      userID: guard.user.id,
     });
 
     return NextResponse.json(product, { status: 201 });

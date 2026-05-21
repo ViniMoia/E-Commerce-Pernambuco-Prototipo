@@ -2,19 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useCartStore } from "@/store/cart.store";
+import { useCart } from "@/components/providers/CartProvider";
 
 // Types
+interface ProductVariant {
+  id: string;
+  size: string;
+  color: string;
+  stock: number;
+}
+
 interface Product {
-  id: number;
-  title: string;
+  id: string;
+  name: string;
   price: number;
   description: string;
-  category: string;
-  image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
+  imageUrl: string;
+  stock: number;
+  productVariants?: ProductVariant[];
 }
 
 // SVG Icons
@@ -38,58 +44,19 @@ export default function EcommerceHomepage() {
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  // Tradutor Local (Mocking EN -> PT-BR)
-  const translateProduct = (prod: Product): Product => {
-    const categoryMap: Record<string, string> = {
-      "men's clothing": "Moda Masculina",
-      "women's clothing": "Moda Feminina",
-      "jewelery": "Joias",
-      "electronics": "Eletrônicos"
-    };
-
-    const titleMap: Record<number, string> = {
-      1: "Mochila Fjallraven Foldsack No. 1",
-      2: "Camiseta Casual Premium Slim Fit",
-      3: "Jaqueta de Algodão Masculina Elegante",
-      4: "Camiseta Manga Longa Casual Slim",
-      5: "Pulseira de Prata de Lei Coleção Lendas",
-      6: "Anel de Ouro Branco Maciço Petite",
-      7: "Anel Banhado a Ouro Princesa Coruja",
-      8: "Brincos de Aço Inoxidável Banhado a Ouro",
-      9: "HD Externo Portátil WD 2TB",
-      10: "SSD Interno SanDisk 1TB Velocidade Ultra",
-      11: "SSD Interno Silicon Power 256GB",
-      12: "HD Externo WD 4TB Gaming Drive",
-      13: "Monitor Acer SB220Q 21.5\" IPS Full HD",
-      14: "Monitor Curvo Samsung 49\" QLED 144Hz",
-      15: "Jaqueta de Inverno 3 em 1 Feminina",
-      16: "Jaqueta de Couro Sintético Motoqueira",
-      17: "Casaco de Chuva Feminino Forrado",
-      18: "Camiseta Feminina Básica Decote em V",
-      19: "Blusa Feminina Manga Curta Decote Redondo",
-      20: "Camiseta Casual de Algodão Feminina"
-    };
-
-    return {
-      ...prod,
-      category: categoryMap[prod.category] || prod.category,
-      title: titleMap[prod.id] || prod.title,
-      description: "Descubra a excelência e durabilidade desta peça exclusiva. Projetada com atenção aos mínimos detalhes para oferecer o máximo de conforto, estilo e um acabamento impecável para o seu dia a dia.",
-    };
-  };
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const { addToCart, isLoading: isAddingToCart } = useCartStore();
+  const { setIsOpen } = useCart();
 
   // 1. Fetching Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://fakestoreapi.com/products";
-        const res = await fetch(apiUrl);
-        const data: Product[] = await res.json();
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error("Falha ao carregar produtos");
+        const data = await res.json();
         
-        // Aplica a tradução programática
-        const translatedData = data.map(translateProduct);
-        setProducts(translatedData);
+        setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Erro ao carregar os produtos:", err);
       } finally {
@@ -120,9 +87,33 @@ export default function EcommerceHomepage() {
     e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   };
 
-  const handleBuy = (e: React.MouseEvent) => {
+  const handleBuy = async (e: React.MouseEvent, product?: Product) => {
     e.stopPropagation();
-    alert("Operação concluída! O item foi adicionado ao seu carrinho.");
+    const prod = product || selectedProduct;
+    if (!prod) return;
+
+    if (prod.productVariants && prod.productVariants.length > 0 && !selectedVariantId) {
+      if (!selectedProduct) {
+        setSelectedProduct(prod);
+        return;
+      }
+      alert("Por favor, selecione um tamanho/cor antes de prosseguir.");
+      return;
+    }
+
+    const variantIdToUse = selectedVariantId || (prod.productVariants?.[0]?.id);
+
+    if (!variantIdToUse) {
+      alert("Produto indisponível (sem variantes).");
+      return;
+    }
+
+    try {
+      await addToCart(variantIdToUse, prod.id, 1);
+      setIsOpen(true);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Loading Screen
@@ -148,7 +139,10 @@ export default function EcommerceHomepage() {
 
           {/* Navigation */}
           <button 
-            onClick={() => setSelectedProduct(null)}
+            onClick={() => {
+              setSelectedProduct(null);
+              setSelectedVariantId(null);
+            }}
             className="flex items-center text-neutral-400 hover:text-white transition-colors mb-8 md:mb-12 group w-min"
           >
             <span className="group-hover:-translate-x-1 transition-transform duration-300">
@@ -162,8 +156,8 @@ export default function EcommerceHomepage() {
             <div className="glass-panel p-8 md:p-12 rounded-[2rem] flex justify-center animate-in shadow-2xl relative" style={{ animationDelay: '0.1s' }}>
               <div className="absolute inset-0 bg-gradient-to-tr from-[#DDAF02]/10 to-transparent rounded-[2rem] pointer-events-none" />
               <img 
-                src={selectedProduct.image} 
-                alt={selectedProduct.title}
+                src={selectedProduct.imageUrl} 
+                alt={selectedProduct.name}
                 className="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] mix-blend-screen bg-white rounded-2xl p-6"
               />
             </div>
@@ -172,10 +166,10 @@ export default function EcommerceHomepage() {
             <div className="space-y-6 md:space-y-8 animate-in" style={{ animationDelay: '0.2s' }}>
               <div>
                 <span className="text-[#DDAF02] bg-[#DDAF02]/10 px-3 py-1 rounded-full border border-[#DDAF02]/20 uppercase tracking-[0.2em] text-xs font-bold inline-block mb-4 md:mb-6">
-                  {selectedProduct.category}
+                  Catálogo
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight">
-                  {selectedProduct.title}
+                  {selectedProduct.name}
                 </h1>
               </div>
               
@@ -183,13 +177,38 @@ export default function EcommerceHomepage() {
                 {selectedProduct.description}
               </p>
               
+              {/* Product Variants Selector */}
+              {selectedProduct.productVariants && selectedProduct.productVariants.length > 0 && (
+                <div className="pt-2 pb-2">
+                  <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-widest mb-3">Selecione o Modelo</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {selectedProduct.productVariants.map(variant => (
+                      <button
+                        key={variant.id}
+                        onClick={() => setSelectedVariantId(variant.id)}
+                        disabled={variant.stock <= 0}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                          selectedVariantId === variant.id 
+                            ? 'border-[#DDAF02] bg-[#DDAF02]/20 text-white' 
+                            : variant.stock <= 0
+                              ? 'border-neutral-800 bg-neutral-900 text-neutral-600 cursor-not-allowed'
+                              : 'border-white/20 bg-transparent text-neutral-400 hover:border-white/50 hover:text-white'
+                        }`}
+                      >
+                        {variant.size} - {variant.color} {variant.stock <= 0 && '(Esgotado)'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-8">
                 <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-md whitespace-nowrap">
                   R$ {selectedProduct.price.toFixed(2)}
                 </span>
                 <div className="flex items-center gap-2 text-[#DDAF02]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  <span className="font-bold text-lg">{selectedProduct.rating.rate} <span className="text-neutral-500 font-normal text-sm">({selectedProduct.rating.count} avaliações)</span></span>
+                  <span className="font-bold text-lg">5.0 <span className="text-neutral-500 font-normal text-sm">(Novo)</span></span>
                 </div>
               </div>
 
@@ -203,7 +222,7 @@ export default function EcommerceHomepage() {
                     <span className="btn-shimmer-effect"></span>
                     <span className="relative z-10 flex items-center text-lg font-bold tracking-wider uppercase text-white group-hover:text-[#DDAF02] transition-colors">
                       <Icons.ShoppingBag className="mr-3" />
-                      Finalizar Compra
+                      {isAddingToCart ? 'Adicionando...' : 'Finalizar Compra'}
                     </span>
                   </span>
                 </button>
@@ -238,8 +257,8 @@ export default function EcommerceHomepage() {
                <div className="relative w-full max-w-[16rem] md:max-w-[32rem] aspect-square glass-panel rounded-full flex items-center justify-center p-6 md:p-12 shadow-2xl group">
                   <div className="absolute inset-0 bg-[#DDAF02]/20 rounded-full blur-[60px] md:blur-[80px] -z-10 animate-pulse mix-blend-screen" />
                   <img 
-                    src={prod.image} 
-                    alt={prod.title} 
+                    src={prod.imageUrl} 
+                    alt={prod.name} 
                     className="w-full h-48 md:h-full max-h-[400px] object-contain mix-blend-screen bg-transparent rounded-3xl drop-shadow-[0_20px_20px_rgba(255,255,255,0.1)] transition-transform duration-[2000ms] hover:scale-110" 
                   />
                </div>
@@ -253,7 +272,7 @@ export default function EcommerceHomepage() {
                   Destaque Premium {idx + 1} / 5
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-semibold text-white tracking-tighter mt-2 md:mt-4 leading-tight line-clamp-2 md:line-clamp-3">
-                  {prod.title}
+                  {prod.name}
                 </h2>
               </div>
               
@@ -321,8 +340,8 @@ export default function EcommerceHomepage() {
                 <div className="h-60 mb-6 p-6 bg-white rounded-xl flex items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:shadow-[inset_0_0_40px_rgba(0,0,0,0.1)]">
                   <div className="absolute inset-0 bg-[#050505]/5 group-hover:bg-transparent transition-colors z-10 pointer-events-none" />
                   <img 
-                    src={prod.image} 
-                    alt={prod.title} 
+                    src={prod.imageUrl} 
+                    alt={prod.name} 
                     className="max-h-full object-contain mix-blend-normal group-hover:scale-[1.12] transition-transform duration-[800ms] cubic-bezier(0.16,1,0.3,1)" 
                   />
                 </div>
@@ -330,10 +349,10 @@ export default function EcommerceHomepage() {
                 {/* Content */}
                 <div className="flex flex-col flex-1 justify-end z-10 relative">
                   <span className="text-[10px] text-[#DDAF02] uppercase tracking-[0.15em] font-bold mb-3 border border-[#DDAF02]/20 bg-[#DDAF02]/5 inline-block w-min whitespace-nowrap px-2 py-1 rounded">
-                    {prod.category}
+                    Produto
                   </span>
                   <h4 className="text-neutral-200 font-medium text-lg leading-snug line-clamp-2 mb-4 group-hover:text-white transition-colors">
-                    {prod.title}
+                    {prod.name}
                   </h4>
                   
                   <div className="flex items-center justify-between mt-auto pt-5 border-t border-white/10 group-hover:border-white/20 transition-colors">
@@ -341,7 +360,7 @@ export default function EcommerceHomepage() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleBuy(e);
+                        handleBuy(e, prod);
                       }}
                       className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:bg-[#DDAF02] group-hover:text-black group-hover:border-[#DDAF02] transition-all duration-300 text-white shadow-lg"
                       title="Adicionar ao Carrinho"
@@ -362,7 +381,7 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center gap-3 mb-6 md:mb-0">
              <span className="w-3 h-3 bg-[#DDAF02] rounded-full drop-shadow-md shadow-[0_0_10px_#DDAF02]"></span>
-             <span className="text-white font-bold tracking-widest uppercase">IBI STORE</span>
+              <span className="text-white font-bold tracking-widest uppercase">PERNAMBUCO</span>
           </div>
           <p className="text-neutral-500 font-mono text-sm uppercase tracking-wider">
             © 2026. Vancer.

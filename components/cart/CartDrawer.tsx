@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCartStore } from "@/store/cart.store";
@@ -10,6 +11,7 @@ import { CartItem } from "./CartItem";
 import { CartSummary } from "./CartSummary";
 
 export function CartDrawer() {
+  const router = useRouter();
   const { isOpen, setIsOpen } = useCart();
   const { 
     cart, 
@@ -81,7 +83,10 @@ export function CartDrawer() {
               subtotal={subtotal} 
               shipping={shipping} 
               total={total} 
-              onCheckout={() => console.log("Checkout API integration goes here")}
+              onCheckout={() => {
+                setIsOpen(false);
+                router.push("/checkout");
+              }}
               onContinueShopping={() => setIsOpen(false)}
             />
           </div>

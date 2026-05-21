@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,14 +16,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Prisma is unavailable in Edge Runtime — use Supabase JS client for raw DB access
-  const supabase = createServerClient(
+  // Since we use the SUPABASE_SERVICE_ROLE_KEY to bypass RLS, we should use createClient directly
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    // Service-role key required: this query bypasses RLS to read Session+User
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: () => {}, // read-only context in middleware
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
       },
     }
   );
@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
     .single();
 
   if (error || !session) {
+    console.error("[MIDDLEWARE_AUTH_ERROR]", error);
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -59,5 +60,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*"],
 };
+

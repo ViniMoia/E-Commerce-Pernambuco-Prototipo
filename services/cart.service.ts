@@ -35,7 +35,16 @@ export async function getCart(userID: string) {
       status: "ACTIVE",
     },
     include: {
-      items: true,
+      items: {
+        include: {
+          product: {
+            select: {
+              lojaID: true,
+              loja: { select: { slug: true } }
+            }
+          }
+        }
+      },
     },
   });
 }
@@ -62,15 +71,43 @@ export async function addToCart(
     throw new CartError("Insufficient stock");
   }
 
-  const cart = await getOrCreateActiveCart(userID);
+  const cart = await prisma.cart.findFirst({
+    where: { userID, status: "ACTIVE" },
+    include: {
+      items: {
+        include: {
+          product: { select: { lojaID: true } }
+        }
+      }
+    }
+  });
+
+  let activeCart;
+
+  if (cart) {
+    activeCart = cart;
+    // Check if the cart has items from a different store
+    if (activeCart.items.length > 0) {
+      const existingLojaID = activeCart.items[0].product.lojaID;
+      if (existingLojaID !== variant.product.lojaID) {
+        throw new CartError("Você só pode adicionar produtos de uma única loja por pedido. Limpe o carrinho atual para trocar de loja.");
+      }
+    }
+  } else {
+    activeCart = await prisma.cart.create({
+      data: { userID, status: "ACTIVE" },
+      include: {
+        items: {
+          include: {
+            product: { select: { lojaID: true } }
+          }
+        }
+      }
+    });
+  }
 
   // 2. Verificar se o item (variante) já existe no carrinho
-  const existingItem = await prisma.cartItem.findFirst({
-    where: {
-      cartID: cart.id,
-      variantID: data.variantID,
-    },
-  });
+  const existingItem = activeCart.items.find(item => item.variantID === data.variantID);
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + data.quantity;
@@ -90,7 +127,7 @@ export async function addToCart(
   // 3b. Se não existir, cria o novo item no carrinho
   return await prisma.cartItem.create({
     data: {
-      cartID: cart.id,
+      cartID: activeCart.id,
       productID: data.productID,
       variantID: data.variantID,
       quantity: data.quantity,

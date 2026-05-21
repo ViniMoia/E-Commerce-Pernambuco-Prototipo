@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCart } from '@/lib/store/cart.store'
+import { useCartStore } from '@/store/cart.store'
 import { Button } from '@/components/ui'
 import { buildWhatsAppMessage, buildWhatsAppUrl } from '@/lib/utils/whatsapp'
 
@@ -20,7 +20,7 @@ interface ConfirmationOrder {
 
 export function CheckoutConfirmationPage() {
   const router = useRouter()
-  const { clearCart } = useCart()
+  const { clearCart } = useCartStore()
   const [order, setOrder] = useState<ConfirmationOrder | null>(null)
   const [copied, setCopied] = useState(false)
 

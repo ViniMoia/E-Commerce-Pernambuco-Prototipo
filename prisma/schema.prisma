@@ -24,6 +24,10 @@ model Loja {
   user          User[]
   orders        Order[]
   products      Product[]
+  // PIX e WhatsApp configuration
+  pixKey          String?   // Chave PIX (CPF, CNPJ, email, telefone ou aleatória)
+  pixKeyType      String?   // Tipo: CPF, CNPJ, EMAIL, TELEFONE, ALEATORIA
+  whatsappNumber  String?   // Número do WhatsApp para contato
 }
 
 model User {
@@ -200,6 +204,7 @@ model Order {
   trackingCode       String?
   adminNotes         String?
   paymentMethod      String?
+  pixKeyUsed         String?              // Chave PIX usada no pagamento (para histórico)
   freightValue       Decimal?
   subtotal           Decimal              @db.Decimal(10, 2)
   shippingCost       Decimal              @default(0) @db.Decimal(10, 2)
@@ -208,10 +213,6 @@ model Order {
   updatedAt          DateTime             @updatedAt
   items              OrderItem[]
   statusHistory      OrderStatusHistory[]
-
-  @@index([userID])
-  @@index([status])
-  @@index([addressID])
 }
 
 model OrderItem {

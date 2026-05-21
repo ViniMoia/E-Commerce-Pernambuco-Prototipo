@@ -1,12 +1,20 @@
 import { Metadata } from "next";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { getCurrentUser } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Novo Produto | Pernambuco Confecções",
   description: "Cadastro de novo produto no catálogo.",
 };
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const user = await getCurrentUser();
+
+  if (!user || user.role !== "ADMIN") {
+    redirect("/login");
+  }
+
   return (
     <div className="container mx-auto py-10 max-w-4xl fade-in">
       <div className="mb-8 space-y-2">
@@ -18,7 +26,8 @@ export default function NewProductPage() {
         </p>
       </div>
       
-      <ProductForm />
+      <ProductForm lojaID={user.lojaID} />
     </div>
   );
 }
+

@@ -22,9 +22,9 @@ import {
 
 // Validação Client-Side com Zod
 const productSchema = z.object({
-  name: z.string().min(1, "O nome é obrigatório"),
-  description: z.string().min(1, "A descrição é obrigatória"),
-  price: z.number().min(0, "Preço inválido"),
+  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
+  price: z.number().min(0.01, "Preço deve ser maior que R$ 0,00"),
   imageUrl: z.string().url("Insira uma URL de imagem válida"),
   stock: z.number().int().min(0, "Estoque inválido"),
   variants: z
@@ -40,7 +40,11 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
-export function ProductForm() {
+interface ProductFormProps {
+  lojaID: string;
+}
+
+export function ProductForm({ lojaID }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -68,7 +72,10 @@ export function ProductForm() {
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          lojaID,
+        }),
       });
 
       if (!response.ok) {
@@ -142,14 +149,14 @@ export function ProductForm() {
                 <FormItem>
                   <FormLabel>Estoque Geral</FormLabel>
                   <FormControl>
-                          <Input
-                            type="number"
-                            value={field.value ?? ""}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            name={field.name}
-                          />
+                    <Input
+                      type="number"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                      name={field.name}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -248,14 +255,14 @@ export function ProductForm() {
                       <FormItem className="flex-1 w-full">
                         <FormLabel>Estoque desta variante</FormLabel>
                         <FormControl>
-                    <Input
-                      type="number"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      name={field.name}
-                    />
+                          <Input
+                            type="number"
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            name={field.name}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
