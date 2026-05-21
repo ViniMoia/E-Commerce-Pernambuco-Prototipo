@@ -37,6 +37,8 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
   const [step, setStep] = useState<Step>(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [freightValue, setFreightValue] = useState<number | null>(null)
+  const [isFetchingFreight, setIsFetchingFreight] = useState(false)
 
      const [formData, setFormData] = useState({
     name: '',
@@ -104,7 +106,7 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
   }
 
 
-  const nextStep = () => {
+  const nextStep = async () => {
     setError(null)
     if (step === 1) {
       const err = validateStep1()
@@ -113,6 +115,27 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
     } else if (step === 2) {
       const err = validateStep2()
       if (err) return setError(err)
+      
+      if (formData.deliveryType === 'DELIVERY') {
+        setIsFetchingFreight(true)
+        try {
+          const res = await fetch(`/api/freight?lojaID=${lojaID}&cityName=${encodeURIComponent(formData.address.city)}`)
+          if (res.ok) {
+            const data = await res.json()
+            setFreightValue(data.value)
+          } else {
+            setFreightValue(null)
+          }
+        } catch (e) {
+          console.error(e)
+          setFreightValue(null)
+        } finally {
+          setIsFetchingFreight(false)
+        }
+      } else {
+        setFreightValue(0)
+      }
+
       setStep(3)
     }
   }
@@ -144,6 +167,7 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
         })),
         deliveryType: formData.deliveryType,
         address: formData.deliveryType === 'DELIVERY' ? formData.address : undefined,
+        freightValue: formData.deliveryType === 'PICKUP' ? 0 : (freightValue !== null ? freightValue : undefined),
         pixKey
       }
 
@@ -396,13 +420,19 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-600 dark:text-zinc-400">Frete</span>
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                      {formData.deliveryType === 'PICKUP' ? 'Grátis' : 'Calculado ao finalizar'}
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100 text-right">
+                      {formData.deliveryType === 'PICKUP' ? (
+                        'Grátis'
+                      ) : freightValue !== null ? (
+                        `R$ ${freightValue.toFixed(2)}`
+                      ) : (
+                        <span className="text-xs text-[#dbb501]">Verificar o valor do frete pelo whats app</span>
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-base">Total Previsto</span>
-                    <span className="font-bold text-[#dbb501] text-lg">R$ {subtotal.toFixed(2)}</span>
+                    <span className="font-bold text-[#dbb501] text-lg">R$ {(subtotal + (freightValue || 0)).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -428,7 +458,8 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
           </Button>
           
           {step < 3 ? (
-            <Button onClick={nextStep} className="bg-[#dbb501] hover:bg-[#dbb501]/90 text-zinc-950 px-8">
+            <Button onClick={nextStep} disabled={isFetchingFreight} className="bg-[#dbb501] hover:bg-[#dbb501]/90 text-zinc-950 px-8">
+              {isFetchingFreight && <Spinner className="mr-2 h-4 w-4" />}
               Continuar
             </Button>
           ) : (
