@@ -192,9 +192,7 @@ export function CustomerProfilePage({ customerId, onClose }: CustomerProfilePage
           </button>
         </div>
         <div className="flex items-start gap-4">
-          <Avatar className="w-16 h-16 bg-zinc-800 text-zinc-100 text-xl font-medium">
-            {getInitials(profile.name)}
-          </Avatar>
+          <Avatar name={profile.name} className="w-16 h-16 bg-zinc-800 text-zinc-100 text-xl font-medium" />
           <div>
             <h2 className="text-2xl font-bold text-zinc-100">{profile.name}</h2>
             <p className="text-zinc-400">{profile.email}</p>
@@ -209,7 +207,7 @@ export function CustomerProfilePage({ customerId, onClose }: CustomerProfilePage
       </div>
 
       <div className="p-6 space-y-8">
-        {metrics && <CustomerMetricsPanel metrics={metrics} />}
+        {metrics && <CustomerMetricsPanel metrics={metrics} isLoading={isLoading} />}
 
         <section className="space-y-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-800 pb-2">

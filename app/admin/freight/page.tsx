@@ -186,7 +186,7 @@ export default function FreightPage() {
             </Button>
             <Button
               type="button"
-              variant="default"
+              variant="danger"
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800 dark:text-red-100"

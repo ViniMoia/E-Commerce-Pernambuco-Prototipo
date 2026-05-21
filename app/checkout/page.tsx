@@ -151,7 +151,7 @@ export default function CheckoutPage() {
             lojaID={loja.id}
             pixKey={loja.pixKey || ''}
             whatsappNumber={loja.whatsappNumber || ''}
-            items={items}
+            items={items as any}
             onOrderCreated={handleOrderCreated}
           />
 

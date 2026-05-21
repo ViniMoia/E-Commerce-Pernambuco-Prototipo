@@ -17,10 +17,12 @@ export function startQueryProfiler(): { stop(): QueryReport } {
     })
   }
 
+  // @ts-ignore - Prisma types require log configuration to allow this
   prisma.$on('query', queryHandler)
 
   return {
     stop(): QueryReport {
+      // @ts-ignore
       prisma.$off('query', queryHandler)
 
       const totalDuration = queries.reduce((sum, q) => sum + q.duration, 0)

@@ -106,9 +106,7 @@ export function OrderStatusManager({
         <div className="space-y-6 py-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Status Atual:</span>
-            <Badge variant={statusLabels[currentStatus].variant as any}>
-              {statusLabels[currentStatus].label}
-            </Badge>
+            <Badge status={currentStatus} />
           </div>
 
           {error && (

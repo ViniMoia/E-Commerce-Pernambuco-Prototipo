@@ -1,4 +1,4 @@
-import { Role, UserStatus, OrderStatus, DeliveryType } from '@prisma/client'
+import { UserStatus, OrderStatus, DeliveryType } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
@@ -26,7 +26,7 @@ export async function seedTestData(lojaID: string): Promise<SeededData> {
       name: 'Admin Test',
       email: `admin-${lojaID.substring(0, 8)}@test.com`,
       password: hashedPassword,
-      role: Role.ADMIN,
+      role: 'ADMIN',
       status: UserStatus.ACTIVE,
       lojaID
     }
@@ -52,7 +52,7 @@ export async function seedTestData(lojaID: string): Promise<SeededData> {
         name: customerNames[i],
         email: `customer${i + 1}-${lojaID.substring(0, 8)}@test.com`,
         password: hashedPassword,
-        role: Role.CUSTOMER,
+        role: 'CUSTOMER',
         status: UserStatus.ACTIVE,
         lojaID
       }
@@ -141,7 +141,7 @@ export async function cleanupTestDb(): Promise<void> {
     where: { orderId: null },
     select: { userID: true }
   })
-  const userIdsWithAddresses = [...new Set(addressUserIds.map(a => a.userID))]
+  const userIdsWithAddresses = Array.from(new Set(addressUserIds.map(a => a.userID)))
 
   await prisma.address.deleteMany({
     where: { orderId: null, userID: { in: userIdsWithAddresses } }

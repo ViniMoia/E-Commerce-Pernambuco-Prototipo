@@ -65,7 +65,7 @@ export async function listOrders(params: ListOrdersParams) {
       user: {
         select: { id: true, name: true, email: true, avatarImageUrl: true },
       },
-      items: { select: { id: true, productName: true, quantity: true, price: true } },
+      items: { select: { id: true, name: true, quantity: true, price: true } },
       address: { select: { city: true, state: true } },
     },
   });
@@ -104,9 +104,7 @@ export async function updateOrderStatusAdmin(
   }
 
   try {
-    // Delegate stock management and atomicity to the domain service.
-    // The domain service uses `orderID` (legacy key name).
-    await updateOrderStatus({ orderID: orderId, newStatus });
+    await updateOrderStatus({ orderId, newStatus, performedById });
 
     // Audit the status change
     await prisma.auditLog.create({
@@ -114,6 +112,8 @@ export async function updateOrderStatusAdmin(
         action: `ORDER_STATUS_CHANGED:${order.status}→${newStatus}`,
         targetId: performedById,
         actorId: performedById,
+        entity: "Order",
+        entityId: orderId,
         metadata: {
           orderId,
           from: order.status,

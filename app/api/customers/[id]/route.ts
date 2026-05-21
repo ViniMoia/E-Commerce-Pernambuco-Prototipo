@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
-import { getCustomerById } from "@/services/customer.service";
+import { getCustomerProfile } from "@/services/customer.service";
 
 type RouteContext = { params: { id: string } };
 
@@ -9,7 +9,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
   if (guard instanceof NextResponse) return guard;
 
   try {
-    const customer = await getCustomerById(params.id);
+    const customer = await getCustomerProfile(params.id);
     return NextResponse.json(customer, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "CUSTOMER_NOT_FOUND") {

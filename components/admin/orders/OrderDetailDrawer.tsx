@@ -7,8 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Button, SkeletonRow, AlertBanner, Spinner } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
+import { Button, SkeletonRow, AlertBanner, Spinner, Badge } from '@/components/ui'
 import { OrderStatus } from '@prisma/client'
 import { OrderStatusManager } from './OrderStatusManager'
 import { X } from 'lucide-react'
@@ -205,9 +204,7 @@ export function OrderDetailDrawer({ orderId, onClose, onStatusUpdate }: OrderDet
                     <SheetTitle className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                       Pedido #{order.orderNumber}
                     </SheetTitle>
-                    <Badge variant={statusMap[order.status]?.variant as any}>
-                      {statusMap[order.status]?.label}
-                    </Badge>
+                    <Badge status={order.status} />
                   </div>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     {formatDate(order.createdAt)}

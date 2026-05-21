@@ -36,7 +36,7 @@ const productSchema = z.object({
       })
     )
     .min(1, "Adicione pelo menos uma variante"),
-  galleryUrls: z.array(z.object({ url: z.string().url("Insira uma URL válida") })).optional().default([]),
+  galleryUrls: z.array(z.object({ url: z.string().url("Insira uma URL válida") })),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;

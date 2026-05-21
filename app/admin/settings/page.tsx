@@ -303,7 +303,7 @@ export default function AdminSettingsPage() {
                 {submitLoading ? (
                   <>
                     <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" strokeCurrent="currentColor" strokeWidth="4"></circle>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="none" d="M4 12a8 8 0 018-8v8z" strokeWidth="4"></path>
                     </svg>
                     Atualizando...
@@ -328,7 +328,7 @@ export default function AdminSettingsPage() {
                 {submitLoading ? (
                   <>
                     <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" strokeCurrent="currentColor" strokeWidth="4"></circle>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="none" d="M4 12a8 8 0 018-8v8z" strokeWidth="4"></path>
                     </svg>
                     Limpando...

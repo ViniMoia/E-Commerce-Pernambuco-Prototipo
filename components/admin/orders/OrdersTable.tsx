@@ -58,8 +58,7 @@ export function OrdersTable({ data, isLoading, onSelectOrder }: OrdersTableProps
       header: 'Status',
       render: (val) => {
         const status = val as OrderStatus
-        const config = statusMap[status] || { label: status, variant: 'default' }
-        return <Badge variant={config.variant as any}>{config.label}</Badge>
+        return <Badge status={status} />
       }
     },
     {

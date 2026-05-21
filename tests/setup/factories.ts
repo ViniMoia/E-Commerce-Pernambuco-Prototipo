@@ -1,13 +1,13 @@
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { User, Order, OrderItem, Address, OrderStatusHistory, Role, UserStatus, OrderStatus, DeliveryType } from '@prisma/client'
+import { User, Order, OrderItem, Address, OrderStatusHistory, UserStatus, OrderStatus, DeliveryType } from '@prisma/client'
 
 interface UserInput {
   name: string
   email: string
   password?: string
   phone?: string
-  role?: Role
+  role?: string
   status?: UserStatus
   lojaID: string
 }
@@ -21,7 +21,7 @@ export async function createTestCustomer(data?: Partial<UserInput>): Promise<Use
       email: data?.email || `customer-${Date.now()}@test.com`,
       password: hashedPassword,
       phone: data?.phone || null,
-      role: data?.role || Role.CUSTOMER,
+      role: data?.role || 'CUSTOMER',
       status: data?.status || UserStatus.ACTIVE,
       lojaID: data?.lojaID || ''
     }
@@ -124,7 +124,7 @@ export async function createOrderStatusHistory(
     throw new Error('Pedido não encontrado.')
   }
 
-  const user = await prisma.user.findFirst({ where: { role: Role.ADMIN } })
+  const user = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
   if (!user) {
     throw new Error('Usuário admin não encontrado para registro de histórico.')
   }

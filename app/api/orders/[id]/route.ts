@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "@/lib/auth/guards";
 import { getOrderById, updateOrderStatus } from "@/services/order.service";
-import { handleOrderError } from "@/app/api/orders/route";
+import { handleOrderError } from "@/lib/order-errors";
 import { OrderStatus } from "@prisma/client";
 
 type RouteContext = { params: { id: string } };
@@ -56,8 +56,9 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
   try {
     await updateOrderStatus({
-      orderID: params.id,
+      orderId: params.id,
       newStatus: parsed.data.status,
+      performedById: guard.user.id,
     });
 
     // Return the updated order so the client doesn't need a second request

@@ -1,5 +1,6 @@
 import { Decimal } from '@prisma/client/runtime/library'
 import prisma from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 interface CartItem {
   productId?: string
