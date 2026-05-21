@@ -19,6 +19,7 @@ export const createProductSchema = z.object({
   description: z.string().min(10, "Descrição deve ter pelo menos 10 caracteres"),
   price: z.number().min(0.01, "Preço deve ser maior que zero"),
   imageUrl: z.string().url("URL da imagem inválida"),
+  galleryUrls: z.array(z.string().url("URL inválida na galeria")).optional().default([]),
   stock: z.number().int().min(0),
   lojaID: z.string().uuid("ID da loja inválido"),
   variants: z.array(productVariantSchema).min(1, "O produto deve ter pelo menos uma variação"),

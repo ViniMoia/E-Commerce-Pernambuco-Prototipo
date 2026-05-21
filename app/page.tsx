@@ -20,6 +20,7 @@ interface Product {
   description: string;
   imageUrl: string;
   stock: number;
+  galleryUrls?: string[];
   productVariants?: ProductVariant[];
 }
 
@@ -47,6 +48,7 @@ export default function EcommerceHomepage() {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
   const { addToCart, isLoading: isAddingToCart } = useCartStore();
   const { setIsOpen } = useCart();
 
@@ -78,6 +80,15 @@ export default function EcommerceHomepage() {
     
     return () => clearInterval(interval);
   }, [products.length, selectedProduct]);
+
+  // Sync active image when product opens
+  useEffect(() => {
+    if (selectedProduct) {
+      setActiveImage(selectedProduct.imageUrl);
+    } else {
+      setActiveImage(null);
+    }
+  }, [selectedProduct]);
 
   // Sync selected variant based on size and color
   useEffect(() => {
@@ -172,14 +183,54 @@ export default function EcommerceHomepage() {
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center">
-            {/* Image Glass Panel */}
-            <div className="glass-panel p-8 md:p-12 rounded-[2rem] flex justify-center animate-in shadow-2xl relative" style={{ animationDelay: '0.1s' }}>
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#DDAF02]/10 to-transparent rounded-[2rem] pointer-events-none" />
-              <img 
-                src={selectedProduct.imageUrl} 
-                alt={selectedProduct.name}
-                className="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] mix-blend-screen bg-white rounded-2xl p-6"
-              />
+            {/* Image & Gallery Column */}
+            <div className="flex flex-col gap-4 animate-in" style={{ animationDelay: '0.1s' }}>
+              {/* Main Image Glass Panel */}
+              <div className="glass-panel p-8 md:p-12 rounded-[2rem] flex justify-center shadow-2xl relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#DDAF02]/10 to-transparent rounded-[2rem] pointer-events-none" />
+                <img 
+                  src={activeImage || selectedProduct.imageUrl} 
+                  alt={selectedProduct.name}
+                  className="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] mix-blend-screen bg-white rounded-2xl p-6 transition-opacity duration-300"
+                />
+              </div>
+
+              {/* Gallery Thumbnails */}
+              {selectedProduct.galleryUrls && selectedProduct.galleryUrls.length > 0 && (
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                  <button
+                    onClick={() => setActiveImage(selectedProduct.imageUrl)}
+                    className={`shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                      (activeImage || selectedProduct.imageUrl) === selectedProduct.imageUrl 
+                        ? 'border-[#DDAF02] opacity-100 scale-100 shadow-lg shadow-[#DDAF02]/20' 
+                        : 'border-white/10 opacity-50 hover:opacity-100 scale-95'
+                    }`}
+                  >
+                    <img 
+                      src={selectedProduct.imageUrl} 
+                      alt="Principal"
+                      className="w-20 h-20 object-cover bg-white"
+                    />
+                  </button>
+                  {selectedProduct.galleryUrls.map((url, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImage(url)}
+                      className={`shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                        activeImage === url 
+                          ? 'border-[#DDAF02] opacity-100 scale-100 shadow-lg shadow-[#DDAF02]/20' 
+                          : 'border-white/10 opacity-50 hover:opacity-100 scale-95'
+                      }`}
+                    >
+                      <img 
+                        src={url} 
+                        alt={`Galeria ${idx + 1}`}
+                        className="w-20 h-20 object-cover bg-white"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Product Info */}

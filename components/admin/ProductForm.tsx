@@ -36,6 +36,7 @@ const productSchema = z.object({
       })
     )
     .min(1, "Adicione pelo menos uma variante"),
+  galleryUrls: z.array(z.object({ url: z.string().url("Insira uma URL válida") })).optional().default([]),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -58,11 +59,17 @@ export function ProductForm({ lojaID }: ProductFormProps) {
       imageUrl: "",
       stock: 0,
       variants: [{ size: "", color: "", stock: 0 }],
+      galleryUrls: [],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     name: "variants",
+    control: form.control,
+  });
+
+  const { fields: galleryFields, append: appendGallery, remove: removeGallery } = useFieldArray({
+    name: "galleryUrls",
     control: form.control,
   });
 
@@ -74,6 +81,7 @@ export function ProductForm({ lojaID }: ProductFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          galleryUrls: data.galleryUrls?.map(g => g.url) || [],
           lojaID,
         }),
       });
@@ -194,6 +202,59 @@ export function ProductForm({ lojaID }: ProductFormProps) {
                 </FormItem>
               )}
             />
+          </div>
+
+          {/* Galeria de Imagens Extras */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h3 className="text-lg font-medium text-[var(--primary)]">
+                Imagens Adicionais (Opcional)
+              </h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendGallery({ url: "" })}
+                className="border-[var(--primary)]/50 hover:bg-[var(--primary)]/10 text-[var(--primary)]"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Imagem
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {galleryFields.map((field, index) => (
+                <div key={field.id} className="flex items-end gap-4 flashlight-card p-4 rounded-lg fade-in">
+                  <FormField
+                    control={form.control}
+                    name={`galleryUrls.${index}.url`}
+                    render={({ field: formField }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>URL da Imagem Extra</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://..." {...formField} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeGallery(index)}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20 shrink-0 mb-0.5"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              ))}
+              {galleryFields.length === 0 && (
+                <p className="text-sm text-neutral-500 italic px-2">
+                  Clique no botão acima para adicionar fotos complementares à página do produto.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Variantes do Produto */}
