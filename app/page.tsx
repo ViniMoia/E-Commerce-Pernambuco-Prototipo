@@ -49,6 +49,7 @@ export default function EcommerceHomepage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { addToCart, isLoading: isAddingToCart } = useCartStore();
   const { setIsOpen } = useCart();
 
@@ -347,6 +348,10 @@ export default function EcommerceHomepage() {
 
   // --- HOMEPAGE VIEW ---
   const heroProducts = products.slice(0, 5);
+  const filteredProducts = products.filter(prod => 
+    prod.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    prod.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#e5e5e5] overflow-x-hidden selection:bg-[#DDAF02]/30 fade-in">
@@ -425,23 +430,55 @@ export default function EcommerceHomepage() {
       {/* Product List Showcase */}
       <section className="px-6 md:px-12 py-32 bg-[#050505] relative z-20">
         <div className="max-w-7xl mx-auto">
-          {/* Section Heading */}
-          <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-8 animate-in" style={{ animationDelay: '0.1s' }}>
+          {/* Section Heading & Search */}
+          <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-8 animate-in" style={{ animationDelay: '0.1s' }}>
             <div>
               <span className="text-[#DDAF02] text-xs font-mono tracking-[0.2em] uppercase font-bold">Catálogo Online</span>
               <h3 className="text-4xl md:text-5xl font-semibold tracking-tighter text-white mt-4">Coleção Completa</h3>
             </div>
-            <p className="text-neutral-400 font-mono text-sm max-w-xs mt-4 md:mt-0 md:text-right">
-              Navegue, interaja e descubra o que há de melhor com nossas interações fluídas.
-            </p>
+            
+            <div className="mt-6 md:mt-0 w-full md:w-auto flex flex-col md:items-end gap-4">
+              <p className="text-neutral-400 font-mono text-sm max-w-xs md:text-right hidden md:block">
+                Navegue, interaja e descubra o que há de melhor com nossas interações fluídas.
+              </p>
+              
+              {/* Search Bar */}
+              <div className="relative w-full md:w-80 group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-neutral-500 group-focus-within:text-[#DDAF02] transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar produtos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-neutral-900/50 border border-white/10 text-white text-sm rounded-full pl-11 pr-10 py-3 focus:outline-none focus:border-[#DDAF02]/50 focus:bg-black transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-neutral-500 hover:text-white transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-            {products.map((prod, index) => (
-              <div 
-                key={prod.id} 
-                onClick={() => setSelectedProduct(prod)}
+          {/* Cards Grid or Empty State */}
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              {filteredProducts.map((prod, index) => (
+                <div 
+                  key={prod.id}  
+                  onClick={() => setSelectedProduct(prod)}
                 onMouseMove={handleMouseMove}
                 className="flashlight-card cursor-pointer group rounded-2xl p-6 flex flex-col justify-between h-[480px] animate-in"
                 style={{ animationDelay: `${(index % 8) * 0.05}s` }}
@@ -482,6 +519,27 @@ export default function EcommerceHomepage() {
               </div>
             ))}
           </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center animate-in fade-in zoom-in duration-500">
+              <div className="w-24 h-24 mb-6 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-500">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <h4 className="text-2xl font-semibold text-white mb-3">Nenhum produto encontrado</h4>
+              <p className="text-neutral-400 max-w-md mx-auto leading-relaxed">
+                Não encontramos nenhum produto em nosso catálogo que corresponda a "<span className="text-white font-medium">{searchQuery}</span>".
+                Verifique a ortografia ou use termos mais amplos.
+              </p>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="mt-8 px-8 py-3 rounded-full border border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all shadow-sm"
+              >
+                Limpar Busca
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

@@ -50,8 +50,8 @@ export function CustomerOrderHistory({ customerId }: CustomerOrderHistoryProps) 
           throw new Error(errData.error || 'Erro ao carregar pedidos')
         }
         const json = await res.json()
-        if (json.success && Array.isArray(json.data)) {
-          const mapped = json.data.map(mapOrder)
+        if (json.success && json.data && Array.isArray(json.data.data)) {
+          const mapped = json.data.data.map(mapOrder)
           setOrders(mapped)
         } else {
           throw new Error('Formato de resposta inv\u00e1lido')

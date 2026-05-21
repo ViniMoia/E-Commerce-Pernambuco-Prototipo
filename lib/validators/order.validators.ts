@@ -9,6 +9,7 @@ export const listOrdersQuerySchema = z.object({
   dateTo: z.coerce.date().optional(),
   cursor: z.string().optional(),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  customerId: z.string().optional(),
 });
 
 export const updateOrderStatusBodySchema = z.object({

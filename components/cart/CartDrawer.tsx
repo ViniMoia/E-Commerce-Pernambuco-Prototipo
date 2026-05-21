@@ -31,8 +31,7 @@ export function CartDrawer() {
   const items = cart?.items || [];
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-  const shipping = subtotal > 100 ? 0 : 15;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -81,7 +80,6 @@ export function CartDrawer() {
           <div className="border-t border-white/10 p-6 bg-black/40 backdrop-blur-md">
             <CartSummary 
               subtotal={subtotal} 
-              shipping={shipping} 
               total={total} 
               onCheckout={() => {
                 setIsOpen(false);

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 
 interface CartSummaryProps {
   subtotal: number;
-  shipping: number;
   total: number;
   onCheckout?: () => void;
   onContinueShopping?: () => void;
@@ -41,7 +40,6 @@ function AnimatedCheckoutButton({ onClick }: { onClick?: () => void }) {
 
 export function CartSummary({ 
   subtotal, 
-  shipping, 
   total,
   onCheckout,
   onContinueShopping
@@ -51,18 +49,16 @@ export function CartSummary({
       <div className="space-y-3 text-sm font-light text-neutral-300">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span className="font-mono text-white">${subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Shipping</span>
           <span className="font-mono text-white">
-            {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subtotal)}
           </span>
         </div>
         <div className="h-[1px] w-full bg-white/10 my-2" />
         <div className="flex justify-between text-base font-medium text-white pt-2">
           <span>Total</span>
-          <span className="font-mono">${total.toFixed(2)}</span>
+          <span className="font-mono">
+            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}
+          </span>
         </div>
       </div>
 

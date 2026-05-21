@@ -101,7 +101,7 @@ export async function listCustomers(
   const data: CustomerRow[] = results.map(user => {
     const totalOrders = user.orders.length
     const totalSpent = user.orders.reduce(
-      (sum, order) => sum + order.total,
+      (sum, order) => sum + Number(order.total),
       0
     )
     const sortedOrders = [...user.orders].sort(
@@ -221,7 +221,7 @@ export async function getCustomerMetrics(
 
   const totalOrders = orders.length
   const totalSpent = orders.reduce(
-    (sum, order) => sum + order.total,
+    (sum, order) => sum + Number(order.total),
     0
   )
   const averageOrderValue = totalSpent / totalOrders

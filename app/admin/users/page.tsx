@@ -20,10 +20,10 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("/api/customers");
+      const res = await fetch("/api/admin/users");
       if (res.ok) {
-        const data = await res.json();
-        setUsers(Array.isArray(data) ? data : data.users || []);
+        const json = await res.json();
+        setUsers(json.data?.customers || []);
       }
     } catch (error) {
       console.error(error);

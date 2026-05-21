@@ -179,20 +179,11 @@ export default function AdminSettingsPage() {
         )}
         {settings && (
           <form onSubmit={handleSubmit} className="w-full max-w-[500px] space-y-6">
-            {/* Logo / Brand */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="relative w-16 h-16 bg-[radial-gradient(800px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(219,181,1,0.08),transparent_40%)] 
-                               flex items-center justify-center rounded-2xl">
-                <div className="absolute inset-0 bg-[radial-gradient(800px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(219,181,1,0.03),transparent_60%)] 
-                             rounded-2xl" />
-                <span className="relative z-10 text-[#dbb501] font-bold text-2xl">IBI</span>
-              </div>
-            </div>
 
             {/* Title */}
             <div className="text-center">
               <h2 className="text-2xl font-bold text-white mb-2">
-                Configurações da Loja
+                Pix e Contato
               </h2>
               <p className="text-sm text-neutral-400">
                 Configure a chave PIX e o WhatsApp para recebimento de pagamentos
@@ -368,10 +359,9 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-[10] mt-auto">
-        <div className="border-t border-neutral-800/20"></div>
-        <div className="px-4 py-6 text-center text-xs text-neutral-500">
-          © 2026 IBI Store Admin. Todos os direitos reservados.
+      <footer className="relative z-[10] border-t border-white/10 py-6">
+        <div className="container mx-auto px-6 text-center text-sm text-neutral-500">
+          © 2026 Painel Admin. Todos os direitos reservados.
         </div>
       </footer>
     </div>

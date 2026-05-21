@@ -194,7 +194,7 @@ export function ProductForm({ lojaID }: ProductFormProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Descrição detalhada do produto..."
-                      className="resize-none h-24"
+                      className="resize-none h-24 text-black"
                       {...field}
                     />
                   </FormControl>

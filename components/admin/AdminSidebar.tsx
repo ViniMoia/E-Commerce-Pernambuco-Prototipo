@@ -61,7 +61,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/admin/settings",
-    label: "Configurações",
+    label: "Pix e Contato",
     icon: Settings,
     exact: false,
   },

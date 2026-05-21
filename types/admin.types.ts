@@ -8,6 +8,7 @@ export type ListOrdersParams = {
   dateTo?: Date;
   cursor?: string;
   lojaID?: string;
+  customerId?: string;
 };
 
 

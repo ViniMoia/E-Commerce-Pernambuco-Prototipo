@@ -8,12 +8,19 @@ export interface UserProfile {
 }
 
 export interface OrderItemSummary {
+  name: string;
   price: number;
   quantity: number;
+  color?: string | null;
+  size?: string | null;
 }
 
 export interface UserOrder {
   id: string;
-  updatedAt: Date;
+  orderNumber: number;
+  status: string;
+  total: number;
+  createdAt: Date;
+  trackingCode?: string | null;
   items: OrderItemSummary[];
 }

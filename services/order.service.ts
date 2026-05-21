@@ -133,6 +133,7 @@ export async function getOrdersByUser(userID: string): Promise<OrderSummary[]> {
 export async function listOrdersForAdmin(params: ListOrdersParams) {
   const where: Prisma.OrderWhereInput = {
     ...(params.lojaID ? { lojaID: params.lojaID } : {}),
+    ...(params.customerId ? { userID: params.customerId } : {}),
     ...(params.status ? { status: params.status } : {}),
     ...((params.dateFrom || params.dateTo)
       ? {

@@ -51,6 +51,8 @@ export async function updateUserRole(
         action: "ROLE_CHANGED",
         targetId,
         actorId,
+        entity: "USER",
+        entityId: targetId,
         metadata: {
           previousRole: targetUser.role,
           newRole,
