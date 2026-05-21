@@ -45,6 +45,8 @@ export default function EcommerceHomepage() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const { addToCart, isLoading: isAddingToCart } = useCartStore();
   const { setIsOpen } = useCart();
 
@@ -77,6 +79,22 @@ export default function EcommerceHomepage() {
     return () => clearInterval(interval);
   }, [products.length, selectedProduct]);
 
+  // Sync selected variant based on size and color
+  useEffect(() => {
+    if (selectedProduct && selectedSize && selectedColor) {
+      const variant = selectedProduct.productVariants?.find(
+        (v) => v.size === selectedSize && v.color === selectedColor
+      );
+      if (variant && variant.stock > 0) {
+        setSelectedVariantId(variant.id);
+      } else {
+        setSelectedVariantId(null);
+      }
+    } else {
+      setSelectedVariantId(null);
+    }
+  }, [selectedSize, selectedColor, selectedProduct]);
+
   // Flashlight Effect Tracking
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -97,7 +115,7 @@ export default function EcommerceHomepage() {
         setSelectedProduct(prod);
         return;
       }
-      alert("Por favor, selecione um tamanho/cor antes de prosseguir.");
+      alert("Por favor, selecione um tamanho e uma cor válidos antes de prosseguir.");
       return;
     }
 
@@ -142,6 +160,8 @@ export default function EcommerceHomepage() {
             onClick={() => {
               setSelectedProduct(null);
               setSelectedVariantId(null);
+              setSelectedSize(null);
+              setSelectedColor(null);
             }}
             className="flex items-center text-neutral-400 hover:text-white transition-colors mb-8 md:mb-12 group w-min"
           >
@@ -178,29 +198,68 @@ export default function EcommerceHomepage() {
               </p>
               
               {/* Product Variants Selector */}
-              {selectedProduct.productVariants && selectedProduct.productVariants.length > 0 && (
-                <div className="pt-2 pb-2">
-                  <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-widest mb-3">Selecione o Modelo</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {selectedProduct.productVariants.map(variant => (
-                      <button
-                        key={variant.id}
-                        onClick={() => setSelectedVariantId(variant.id)}
-                        disabled={variant.stock <= 0}
-                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
-                          selectedVariantId === variant.id 
-                            ? 'border-[#DDAF02] bg-[#DDAF02]/20 text-white' 
-                            : variant.stock <= 0
-                              ? 'border-neutral-800 bg-neutral-900 text-neutral-600 cursor-not-allowed'
-                              : 'border-white/20 bg-transparent text-neutral-400 hover:border-white/50 hover:text-white'
-                        }`}
-                      >
-                        {variant.size} - {variant.color} {variant.stock <= 0 && '(Esgotado)'}
-                      </button>
-                    ))}
+              {selectedProduct.productVariants && selectedProduct.productVariants.length > 0 && (() => {
+                const sizes = Array.from(new Set(selectedProduct.productVariants!.map(v => v.size)));
+                const colors = Array.from(new Set(selectedProduct.productVariants!.map(v => v.color)));
+
+                return (
+                  <div className="pt-2 pb-2 space-y-6">
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-widest mb-3">Selecione o Tamanho</h3>
+                      <div className="flex flex-wrap gap-3">
+                        {sizes.map(size => {
+                          const isAvailable = selectedProduct.productVariants!.some(v => v.size === size && v.stock > 0);
+                          return (
+                            <button
+                              key={size}
+                              onClick={() => setSelectedSize(size)}
+                              disabled={!isAvailable}
+                              className={`px-5 py-2 rounded-full border text-sm font-medium transition-all ${
+                                selectedSize === size 
+                                  ? 'border-[#DDAF02] bg-[#DDAF02]/20 text-white' 
+                                  : !isAvailable
+                                    ? 'border-neutral-800 bg-neutral-900 text-neutral-600 cursor-not-allowed opacity-50'
+                                    : 'border-white/20 bg-transparent text-neutral-400 hover:border-white/50 hover:text-white'
+                              }`}
+                            >
+                              {size}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-widest mb-3">Selecione a Cor</h3>
+                      <div className="flex flex-wrap gap-3">
+                        {colors.map(color => {
+                          // Se já houver um tamanho selecionado, verificamos se a cor existe para esse tamanho
+                          const isAvailable = selectedSize 
+                            ? selectedProduct.productVariants!.some(v => v.size === selectedSize && v.color === color && v.stock > 0)
+                            : selectedProduct.productVariants!.some(v => v.color === color && v.stock > 0);
+                            
+                          return (
+                            <button
+                              key={color}
+                              onClick={() => setSelectedColor(color)}
+                              disabled={!isAvailable}
+                              className={`px-5 py-2 rounded-full border text-sm font-medium transition-all ${
+                                selectedColor === color 
+                                  ? 'border-[#DDAF02] bg-[#DDAF02]/20 text-white' 
+                                  : !isAvailable
+                                    ? 'border-neutral-800 bg-neutral-900 text-neutral-600 cursor-not-allowed opacity-50'
+                                    : 'border-white/20 bg-transparent text-neutral-400 hover:border-white/50 hover:text-white'
+                              }`}
+                            >
+                              {color}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-8">
                 <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-md whitespace-nowrap">
