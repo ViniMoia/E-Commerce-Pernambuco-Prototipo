@@ -81,7 +81,7 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
    const order = await prisma.$transaction(async (tx: PrismaClient) => {
      const created = await tx.order.create({
        data: {
-         lojaID: params.lojaID,
+         loja: { connect: { id: params.lojaID } },
          user: { connect: userConnect },
          address: params.deliveryType === 'DELIVERY' && params.address ? {
            create: {

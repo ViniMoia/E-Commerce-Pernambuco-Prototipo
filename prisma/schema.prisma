@@ -195,10 +195,10 @@ model Order {
   orderNumber        Int                  @unique @default(autoincrement())
   userID             String
   user               User                 @relation(fields: [userID], references: [id])
-  addressID          String
+  addressID          String?
   lojaID             String
   loja               Loja                 @relation(fields: [lojaID], references: [id])
-  address            Address              @relation(fields: [addressID], references: [id])
+  address            Address?             @relation(fields: [addressID], references: [id])
   status             OrderStatus          @default(PENDING)
   deliveryType       DeliveryType
   trackingCode       String?
@@ -219,8 +219,8 @@ model OrderItem {
   id                String           @id @default(uuid())
   orderId           String
   order             Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId         String
-  product           Product          @relation(fields: [productId], references: [id])
+  productId         String?
+  product           Product?         @relation(fields: [productId], references: [id])
   name              String
   quantity          Int
   price             Decimal          @db.Decimal(10, 2)

@@ -121,7 +121,14 @@ export function CheckoutForm({ lojaID, pixKey, whatsappNumber, items = [], onOrd
           email: formData.email,
           phone: formData.phone.replace(/\D/g, '')
         },
-        items,
+        items: items.map((item: any) => ({
+          productId: item.productId || item.productID,
+          name: item.name || item.productName,
+          quantity: item.quantity,
+          price: item.price,
+          color: item.color,
+          size: item.size
+        })),
         deliveryType: formData.deliveryType,
         address: formData.deliveryType === 'DELIVERY' ? formData.address : undefined,
         pixKey

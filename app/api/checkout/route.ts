@@ -24,6 +24,11 @@ export async function POST(request: Request) {
     freightValue = rule ? (rule.value as Prisma.Decimal).toNumber() : 0
   }
 
-  const result = await createOrder({ ...data, freightValue })
-  return ok(result)
+  try {
+    const result = await createOrder({ ...data, freightValue })
+    return ok(result)
+  } catch (error: any) {
+    console.error("[CHECKOUT_ERROR]", error)
+    return err(error?.message || "Erro interno do servidor ao criar pedido", 500)
+  }
 }
