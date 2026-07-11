@@ -64,7 +64,21 @@ export const getLojaFromHeaders = cache(async () => {
     }
 
     // Busca por slug (se a request vier direta sem domínio) ou domínio personalizado no banco
-    return await getCachedLojaBySlugOrDomain(cleanHost);
+    let loja = await getCachedLojaBySlugOrDomain(cleanHost);
+
+    // Fallback de Produção: Se nenhuma loja for encontrada pelo domínio,
+    // carregamos a loja padrão do sistema para garantir que a aplicação nunca caia (evita erro 404).
+    if (!loja) {
+      const defaultSlug = process.env.NEXT_PUBLIC_DEFAULT_LOJA_SLUG || "loja-padrao";
+      loja = await getCachedLojaBySlug(defaultSlug);
+    }
+
+    // Último recurso: pegar a primeira loja do banco se a loja padrão também não existir
+    if (!loja) {
+      loja = await prisma.loja.findFirst();
+    }
+
+    return loja;
   } catch (error) {
     console.error("[GET_LOJA_FROM_HEADERS_ERROR]", error);
     return null;
