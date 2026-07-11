@@ -2,6 +2,8 @@
 
 import { Minus, Plus, Trash2 } from "lucide-react";
 
+import { getOptimizedImageUrl } from "@/lib/utils";
+
 interface CartItemProps {
   item: {
     id: string;
@@ -23,7 +25,7 @@ export function CartItem({ item, onRemove, onUpdateQuantity, isLoading }: CartIt
     <div className="flex gap-4 group py-2">
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-none overflow-hidden bg-neutral-800 shrink-0 ring-1 ring-white/10">
         <img
-          src={item.imageUrl}
+          src={getOptimizedImageUrl(item.imageUrl, 150, 150)}
           alt={item.productName}
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
         />

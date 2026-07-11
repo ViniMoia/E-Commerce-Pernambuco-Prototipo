@@ -65,7 +65,12 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
     userConnect = { id: params.customer.userId }
   } else {
     const upserted = await prisma.user.upsert({
-      where: { email: params.customer.email },
+      where: {
+        email_lojaID: {
+          email: params.customer.email,
+          lojaID: params.lojaID,
+        }
+      },
       update: {},
       create: {
         name: params.customer.name,

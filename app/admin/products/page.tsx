@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getOptimizedImageUrl } from "@/lib/utils";
 import {
   Plus,
   Search,
@@ -178,7 +179,7 @@ export default function AdminProductsPage() {
                   <div className="w-14 h-14 shrink-0 rounded-lg bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
                     {product.imageUrl ? (
                       <img
-                        src={product.imageUrl}
+                        src={getOptimizedImageUrl(product.imageUrl, 80, 80)}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />

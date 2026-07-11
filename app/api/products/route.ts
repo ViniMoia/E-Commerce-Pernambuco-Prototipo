@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import * as productService from "@/services/product.service";
 import { productFiltersSchema, createProductSchema } from "@/lib/validators/product";
+import { getLojaFromHeaders } from "@/lib/tenant";
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +17,20 @@ export async function GET(request: Request) {
       );
     }
 
-    const products = await productService.getProducts(parsed.data);
+    // Resolve a loja ativa pelos headers Host
+    const activeLoja = await getLojaFromHeaders();
+    if (!activeLoja) {
+      return NextResponse.json(
+        { error: "Loja não encontrada para este domínio" },
+        { status: 404 }
+      );
+    }
+
+    // Sobrescreve o filtro lojaId com a loja ativa resolvida para segurança
+    const products = await productService.getProducts({
+      ...parsed.data,
+      lojaId: activeLoja.id,
+    });
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
     console.error("[PRODUCTS_GET]", error);
@@ -44,9 +58,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // userId always comes from the verified session, never from the request body
+    // Enforce store isolation: lojaID and userID come from the verified session
     const product = await productService.createProduct({
       ...parsed.data,
+      lojaID: guard.user.lojaID,
       userID: guard.user.id,
     });
 

@@ -24,6 +24,9 @@ model Loja {
   user          User[]
   orders        Order[]
   products      Product[]
+  primaryColor    String?   @default("#DDAF02")
+  secondaryColor  String?   @default("#050505")
+  customDomain    String?   @unique
   // PIX e WhatsApp configuration
   pixKey          String?   // Chave PIX (CPF, CNPJ, email, telefone ou aleatória)
   pixKeyType      String?   // Tipo: CPF, CNPJ, EMAIL, TELEFONE, ALEATORIA
@@ -33,7 +36,7 @@ model Loja {
 model User {
   id                 String               @id @default(uuid())
   name               String               @db.VarChar(150)
-  email              String               @unique @db.VarChar(255)
+  email              String               @db.VarChar(255)
   password           String               @db.VarChar(255)
   phone              String?              @db.VarChar(20)
   createdAt          DateTime             @default(now())
@@ -57,6 +60,7 @@ model User {
   auditLogsAsActor   AuditLog[]           @relation("AuditActor")
   OrderStatusHistory OrderStatusHistory[]
 
+  @@unique([email, lojaID])
   @@index([email])
   @@index([lojaID])
   @@index([defaultAddressId])
@@ -99,6 +103,9 @@ model Product {
   cartItem        CartItem[]
   productVariants ProductVariants[]
   orderItems      OrderItem[]
+
+  @@index([lojaID])
+  @@index([createdAt])
 }
 
 model ProductVariants {
@@ -112,6 +119,8 @@ model ProductVariants {
   updatedAt  DateTime    @updatedAt
   cartItem   CartItem[]
   orderItems OrderItem[]
+
+  @@index([ProductID])
 }
 
 model Cart {

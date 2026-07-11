@@ -20,6 +20,7 @@ interface AdminSidebarProps {
   adminName: string;
   adminInitials: string;
   adminAvatarUrl?: string | null;
+  lojaName?: string;
 }
 
 const NAV_ITEMS = [
@@ -71,6 +72,7 @@ function SidebarContent({
   adminName,
   adminInitials,
   adminAvatarUrl,
+  lojaName = "Admin",
   onClose,
 }: AdminSidebarProps & { onClose?: () => void }) {
   const pathname = usePathname();
@@ -85,12 +87,12 @@ function SidebarContent({
       {/* Brand */}
       <div className="px-6 py-6 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 bg-[#DDAF02] rounded-full shadow-[0_0_10px_#DDAF02] animate-pulse shrink-0" />
+          <span className="w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_10px_var(--primary)] animate-pulse shrink-0" />
           <div>
             <p className="text-white text-xs font-bold tracking-widest uppercase leading-none">
-              Pernambuco
+              {lojaName}
             </p>
-            <p className="text-[#DDAF02] text-[10px] font-mono tracking-[0.2em] uppercase mt-0.5">
+            <p className="text-primary text-[10px] font-mono tracking-[0.2em] uppercase mt-0.5">
               Admin Panel
             </p>
           </div>
@@ -122,19 +124,19 @@ function SidebarContent({
                 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group
                 ${
                   active
-                    ? "bg-[#DDAF02]/10 text-[#DDAF02] border border-[#DDAF02]/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
                 }
               `}
             >
               <Icon
                 className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                  active ? "text-[#DDAF02]" : ""
+                  active ? "text-primary" : ""
                 }`}
               />
               <span>{label}</span>
               {active && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#DDAF02] shadow-[0_0_6px_#DDAF02]" />
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
               )}
             </Link>
           );
@@ -145,7 +147,7 @@ function SidebarContent({
       <div className="px-3 py-4 border-t border-white/5 space-y-2">
         {/* Admin profile chip */}
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/5">
-          <div className="w-8 h-8 rounded-full bg-[#DDAF02]/10 border border-[#DDAF02]/30 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center overflow-hidden shrink-0">
             {adminAvatarUrl ? (
               <img
                 src={adminAvatarUrl}
@@ -153,14 +155,14 @@ function SidebarContent({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-[#DDAF02] text-xs font-bold">
+              <span className="text-primary text-xs font-bold">
                 {adminInitials}
               </span>
             )}
           </div>
           <div className="min-w-0">
             <p className="text-white text-xs font-medium truncate">{adminName}</p>
-            <p className="text-[10px] text-[#DDAF02] font-mono tracking-wider">
+            <p className="text-[10px] text-primary font-mono tracking-wider">
               Admin
             </p>
           </div>

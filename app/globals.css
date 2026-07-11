@@ -4,7 +4,8 @@
 
 :root {
   --primary: #DDAF02;
-  --bg-deep: #050505;
+  --secondary: #050505;
+  --bg-deep: var(--secondary);
   --text-main: #e5e5e5;
 }
 

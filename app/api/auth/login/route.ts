@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loginSchema } from "@/lib/validators/auth";
 import { loginUser, AuthError } from "@/services/auth.service";
 import { createSession } from "@/lib/session";
+import { getLojaFromHeaders } from "@/lib/tenant";
 
 export async function POST(req: Request) {
   try {
@@ -17,8 +18,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Autenticação
-    const user = await loginUser(parsed.data);
+    // Resolve a loja ativa pelo Host da requisição
+    const activeLoja = await getLojaFromHeaders();
+    if (!activeLoja) {
+      return NextResponse.json(
+        { error: "Loja não encontrada para este domínio" },
+        { status: 404 }
+      );
+    }
+
+    // 🔐 Autenticação com escopo de loja
+    const user = await loginUser({
+      ...parsed.data,
+      lojaID: activeLoja.id,
+    });
 
     // 🍪 Criação de sessão na base de dados + Cookie
     await createSession(user.id);

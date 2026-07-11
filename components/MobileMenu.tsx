@@ -7,9 +7,10 @@ import { CartButton } from "./cart/CartButton";
 
 interface MobileMenuProps {
   user: any;
+  lojaName?: string;
 }
 
-export function MobileMenu({ user }: MobileMenuProps) {
+export function MobileMenu({ user, lojaName = "Loja" }: MobileMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -18,7 +19,7 @@ export function MobileMenu({ user }: MobileMenuProps) {
     <>
       {/* Hamburger Button */}
       <button 
-        className="md:hidden pointer-events-auto bg-black/40 backdrop-blur-md p-2.5 rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-[#DDAF02]/50 z-[70]"
+        className="md:hidden pointer-events-auto bg-black/40 backdrop-blur-md p-2.5 rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 z-[70]"
         onClick={toggleMenu}
         aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
         aria-expanded={menuOpen}
@@ -45,8 +46,8 @@ export function MobileMenu({ user }: MobileMenuProps) {
           {/* Logo inside menu */}
           <div className={`pb-6 border-b border-white/10 transition-all duration-500 delay-100 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}>
             <h2 className="text-sm font-bold tracking-widest text-white uppercase flex items-center gap-2">
-              <span className="w-2 h-2 bg-[#DDAF02] rounded-full animate-pulse shadow-[0_0_10px_#DDAF02]"></span>
-              Pernambuco
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--primary)]"></span>
+              {lojaName}
             </h2>
           </div>
 
@@ -56,13 +57,13 @@ export function MobileMenu({ user }: MobileMenuProps) {
                 <Link 
                   href="/profile" 
                   onClick={toggleMenu}
-                  className={`flex items-center gap-4 hover:text-[#DDAF02] transition-all duration-500 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}
+                  className={`flex items-center gap-4 hover:text-primary transition-all duration-500 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"}`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#DDAF02]/10 border border-[#DDAF02]/50 flex items-center justify-center overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/50 flex items-center justify-center overflow-hidden">
                     {user.avatarImageUrl ? (
                       <img src={user.avatarImageUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-[#DDAF02] text-sm font-bold">{user.name.substring(0, 2).toUpperCase()}</span>
+                      <span className="text-primary text-sm font-bold">{user.name.substring(0, 2).toUpperCase()}</span>
                     )}
                   </div>
                   <div className="flex flex-col">

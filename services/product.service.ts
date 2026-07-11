@@ -1,7 +1,10 @@
 import prisma from "@/lib/prisma";
 
 export async function getProducts(filters: any = {}) {
-  const { name, minPrice, maxPrice, lojaId } = filters;
+  const { name, minPrice, maxPrice, lojaId, page, limit } = filters;
+
+  const take = limit ? Number(limit) : undefined;
+  const skip = page && limit ? (Number(page) - 1) * Number(limit) : undefined;
 
   return await prisma.product.findMany({
     where: {
@@ -12,6 +15,8 @@ export async function getProducts(filters: any = {}) {
       },
       lojaID: lojaId,
     },
+    take,
+    skip,
     include: {
       productVariants: true,
     },

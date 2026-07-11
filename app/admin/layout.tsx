@@ -1,13 +1,31 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import prisma from "@/lib/prisma";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: {
-    template: "%s | Admin — Pernambuco Confecções",
-    default: "Painel Admin | Pernambuco Confecções",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const user = await getCurrentUser();
+  if (!user || !user.lojaID) {
+    return {
+      title: "Painel Admin",
+    };
+  }
+
+  const loja = await prisma.loja.findUnique({
+    where: { id: user.lojaID },
+    select: { name: true },
+  });
+
+  const name = loja?.name || "E-Commerce";
+
+  return {
+    title: {
+      template: `%s | Admin — ${name}`,
+      default: `Painel Admin | ${name}`,
+    },
+  };
+}
 
 export default async function AdminLayout({
   children,
@@ -22,6 +40,12 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
+  const loja = await prisma.loja.findUnique({
+    where: { id: user.lojaID },
+    select: { name: true },
+  });
+  const lojaName = loja?.name || "Admin";
+
   const initials = user.name
     .split(" ")
     .slice(0, 2)
@@ -35,6 +59,7 @@ export default async function AdminLayout({
         adminName={user.name}
         adminInitials={initials}
         adminAvatarUrl={user.avatarImageUrl}
+        lojaName={lojaName}
       />
 
       {/* Main content area */}

@@ -19,27 +19,21 @@ export const metadata: Metadata = {
 
 async function getDashboardMetrics(lojaID: string) {
   const [
-    totalOrders,
-    pendingOrders,
-    paidOrders,
-    cancelledOrders,
+    orderGroups,
     totalCustomers,
     totalProducts,
     totalFreightRules,
-    revenueAggregate,
     recentOrders,
   ] = await Promise.all([
-    prisma.order.count({ where: { lojaID } }),
-    prisma.order.count({ where: { lojaID, status: "PENDING" } }),
-    prisma.order.count({ where: { lojaID, status: "PAID" } }),
-    prisma.order.count({ where: { lojaID, status: "CANCELLED" } }),
+    prisma.order.groupBy({
+      by: ["status"],
+      where: { lojaID },
+      _count: { _all: true },
+      _sum: { total: true },
+    }),
     prisma.user.count({ where: { lojaID, role: "CUSTOMER" } }),
     prisma.product.count({ where: { lojaID } }),
     prisma.freightRule.count({ where: { lojaID } }),
-    prisma.order.aggregate({
-      where: { lojaID, status: { not: "CANCELLED" } },
-      _sum: { total: true },
-    }),
     prisma.order.findMany({
       where: { lojaID },
       orderBy: { createdAt: "desc" },
@@ -50,7 +44,29 @@ async function getDashboardMetrics(lojaID: string) {
     }),
   ]);
 
-  const totalRevenue = revenueAggregate._sum.total?.toNumber() ?? 0;
+  // Process order metric aggregates locally
+  let totalOrders = 0;
+  let pendingOrders = 0;
+  let paidOrders = 0;
+  let cancelledOrders = 0;
+  let totalRevenue = 0;
+
+  for (const group of orderGroups) {
+    const count = group._count._all;
+    totalOrders += count;
+
+    if (group.status === "PENDING") {
+      pendingOrders = count;
+    } else if (group.status === "PAID") {
+      paidOrders = count;
+    } else if (group.status === "CANCELLED") {
+      cancelledOrders = count;
+    }
+
+    if (group.status !== "CANCELLED") {
+      totalRevenue += group._sum.total?.toNumber() ?? 0;
+    }
+  }
 
   return {
     totalOrders,

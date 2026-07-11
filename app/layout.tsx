@@ -4,22 +4,30 @@ import { Header } from "@/components/Header";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { CartProvider } from "@/components/providers/CartProvider";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
-import prisma from "@/lib/prisma";
+import { getLojaFromHeaders } from "@/lib/tenant";
 
-export const metadata: Metadata = {
-  title: "Pernambuco Confecções",
-  description: "Construindo interfaces reais com movimento.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const loja = await getLojaFromHeaders();
+  return {
+    title: loja?.name || "E-Commerce",
+    description: loja?.description || "Construindo interfaces reais com movimento.",
+  };
+}
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const loja = await prisma.loja.findFirst();
+  const loja = await getLojaFromHeaders();
+
+  const themeStyle = {
+    "--primary": loja?.primaryColor || "#DDAF02",
+    "--secondary": loja?.secondaryColor || "#050505",
+  } as React.CSSProperties;
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" style={themeStyle}>
       <body className="antialiased">
         <CartProvider>
           <ConditionalHeader>

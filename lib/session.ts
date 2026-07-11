@@ -40,7 +40,9 @@ export async function deleteSession() {
   cookieStore.delete("session_id");
 }
 
-export async function getCurrentUser() {
+import { cache } from "react";
+
+export const getCurrentUser = cache(async () => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("session_id")?.value;
   
@@ -79,4 +81,4 @@ export async function getCurrentUser() {
     console.error("Failed to fetch session/user:", error);
     return null;
   }
-}
+});

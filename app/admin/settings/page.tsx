@@ -6,9 +6,16 @@ import { Button } from '@/components/ui';
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<{
+    name: string;
+    slug: string;
+    description: string;
+    coverImageUrl: string;
     pixKey: string | null;
     pixKeyType: string | null;
     whatsappNumber: string | null;
+    primaryColor: string | null;
+    secondaryColor: string | null;
+    customDomain: string | null;
   } | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -33,9 +40,16 @@ export default function AdminSettingsPage() {
 
       const data = await res.json();
       setSettings(data || {
+        name: '',
+        slug: '',
+        description: '',
+        coverImageUrl: '',
         pixKey: null,
         pixKeyType: null,
-        whatsappNumber: null
+        whatsappNumber: null,
+        primaryColor: '#DDAF02',
+        secondaryColor: '#050505',
+        customDomain: null
       });
       setLoading(false);
     } catch (err) {
@@ -58,20 +72,23 @@ export default function AdminSettingsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: settings.name,
+          slug: settings.slug,
+          description: settings.description,
+          coverImageUrl: settings.coverImageUrl,
           pixKey: settings.pixKey === '' ? null : settings.pixKey,
           pixKeyType: settings.pixKeyType === '' ? null : settings.pixKeyType,
-          whatsappNumber: settings.whatsappNumber === '' ? null : settings.whatsappNumber
+          whatsappNumber: settings.whatsappNumber === '' ? null : settings.whatsappNumber,
+          primaryColor: settings.primaryColor === '' ? null : settings.primaryColor,
+          secondaryColor: settings.secondaryColor === '' ? null : settings.secondaryColor,
+          customDomain: settings.customDomain === '' ? null : settings.customDomain
         })
       });
 
       if (res.ok) {
         const updated = await res.json();
         setSuccessMessage('Configurações atualizadas com sucesso!');
-        setSettings({
-          pixKey: updated.pixKey,
-          pixKeyType: updated.pixKeyType,
-          whatsappNumber: updated.whatsappNumber
-        });
+        setSettings(updated);
       } else {
         const errData = await res.json().catch(() => null);
         setErrorMessage(errData?.error || 'Falha ao atualizar configurações');
@@ -85,7 +102,7 @@ export default function AdminSettingsPage() {
   };
 
   const handleClearSettings = async () => {
-    if (!confirm('Deseja realmente apagar a chave PIX e o número do WhatsApp de sua loja?')) return;
+    if (!confirm('Deseja realmente apagar os dados de Pix e contato de sua loja? (Nome, slug e tema serão mantidos)')) return;
     
     setSubmitLoading(true);
     setSuccessMessage(null);
@@ -96,6 +113,7 @@ export default function AdminSettingsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...settings,
           pixKey: null,
           pixKeyType: null,
           whatsappNumber: null
@@ -104,12 +122,8 @@ export default function AdminSettingsPage() {
 
       if (res.ok) {
         const updated = await res.json();
-        setSuccessMessage('Configurações apagadas com sucesso!');
-        setSettings({
-          pixKey: null,
-          pixKeyType: null,
-          whatsappNumber: null
-        });
+        setSuccessMessage('Configurações de contato apagadas com sucesso!');
+        setSettings(updated);
       } else {
         const errorData = await res.json().catch(() => null);
         setErrorMessage(errorData?.error || 'Falha ao apagar configurações');
@@ -178,22 +192,22 @@ export default function AdminSettingsPage() {
           </div>
         )}
         {settings && (
-          <form onSubmit={handleSubmit} className="w-full max-w-[500px] space-y-6">
+          <form onSubmit={handleSubmit} className="w-full max-w-[600px] space-y-6 bg-zinc-950/80 p-8 rounded-2xl border border-white/5 backdrop-blur-md">
 
             {/* Title */}
             <div className="text-center">
               <h2 className="text-2xl font-bold text-white mb-2">
-                Pix e Contato
+                Configurações da Loja
               </h2>
               <p className="text-sm text-neutral-400">
-                Configure a chave PIX e o WhatsApp para recebimento de pagamentos
+                Personalize a identidade de marca, visual, contatos e chaves PIX de sua loja
               </p>
             </div>
 
             {/* Success Message */}
             {successMessage && (
-              <div className="bg-[#DDAF02]/10 border border-[#DDAF02]/20 rounded-xl p-4 mb-4">
-                <p className="text-[#DDAF02] font-medium">{successMessage}</p>
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4">
+                <p className="text-primary font-medium">{successMessage}</p>
               </div>
             )}
 
@@ -204,54 +218,214 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* PIX Key Section */}
-            <div className="space-y-4">
-              <label className="text-[10px] text-[#DDAF02] font-mono tracking-[0.25em] uppercase block mb-1">
-                Chave PIX
-              </label>
-              <div className="relative">
+            {/* --- SEÇÃO IDENTIDADE --- */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest border-b border-white/5 pb-2">Identidade</h3>
+              
+              {/* Nome da Loja */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Nome da Loja
+                </label>
                 <input
                   type="text"
-                  value={settings.pixKey ?? ''}
-                  onChange={(e) => setSettings(prev => prev ? {...prev, pixKey: e.target.value} : settings)}
-                  placeholder="Digite sua chave PIX (CPF, CNPJ, email, telefone ou chave aleatória)"
+                  value={settings.name ?? ''}
+                  onChange={(e) => setSettings(prev => prev ? {...prev, name: e.target.value} : settings)}
+                  placeholder="Nome de sua empresa"
                   className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
                            text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
-                           focus:ring-2 focus:ring-[#DDAF02]/50 focus:border-[#DDAF02] transition-all
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                           ${submitLoading ? 'opacity-70' : ''}`}
+                  required
+                  disabled={submitLoading}
+                />
+              </div>
+
+              {/* Slug da Loja */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Slug (Subdomínio)
+                </label>
+                <input
+                  type="text"
+                  value={settings.slug ?? ''}
+                  onChange={(e) => setSettings(prev => prev ? {...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')} : settings)}
+                  placeholder="ex: minha-loja"
+                  className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                           text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                           ${submitLoading ? 'opacity-70' : ''}`}
+                  required
+                  disabled={submitLoading}
+                />
+              </div>
+
+              {/* Descrição */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Descrição (SEO)
+                </label>
+                <textarea
+                  value={settings.description ?? ''}
+                  onChange={(e) => setSettings(prev => prev ? {...prev, description: e.target.value} : settings)}
+                  placeholder="Uma breve descrição sobre sua loja para as buscas do Google"
+                  rows={2}
+                  className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                           text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
                            ${submitLoading ? 'opacity-70' : ''}`}
                   disabled={submitLoading}
                 />
-                {settings.pixKey && (
-                  <button
-                    type="button"
-                    onClick={() => setSettings(prev => prev ? {...prev, pixKey: ''} : settings)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center 
-                             text-neutral-400 hover:text-[#DDAF02] transition-colors"
-                    disabled={submitLoading}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                  </button>
-                )}
-                <p className="mt-1 text-xs text-neutral-500">
-                  Formatos válidos: CPF, CNPJ, E-mail, Telefone ou Chave Aleatória
-                </p>
+              </div>
+
+              {/* URL da Logomarca */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Logotipo / URL da Imagem
+                </label>
+                <input
+                  type="text"
+                  value={settings.coverImageUrl ?? ''}
+                  onChange={(e) => setSettings(prev => prev ? {...prev, coverImageUrl: e.target.value} : settings)}
+                  placeholder="Link público para imagem da logomarca"
+                  className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                           text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                           ${submitLoading ? 'opacity-70' : ''}`}
+                  disabled={submitLoading}
+                />
               </div>
             </div>
 
-            {/* PIX Key Type Section */}
-            <div className="space-y-4">
-              <label className="text-[10px] text-[#DDAF02] font-mono tracking-[0.25em] uppercase block mb-1">
-                Tipo da Chave PIX
-              </label>
-              <div className="relative">
+            {/* --- SEÇÃO ESTILO & DESIGN --- */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest border-b border-white/5 pb-2">Estilo & Layout</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {/* Cor Primária */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                    Cor Primária (Hex)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={settings.primaryColor || '#DDAF02'}
+                      onChange={(e) => setSettings(prev => prev ? {...prev, primaryColor: e.target.value} : settings)}
+                      className="h-12 w-12 rounded-lg bg-[#050505]/50 border border-neutral-700/50 p-1 cursor-pointer"
+                      disabled={submitLoading}
+                    />
+                    <input
+                      type="text"
+                      value={settings.primaryColor || '#DDAF02'}
+                      onChange={(e) => setSettings(prev => prev ? {...prev, primaryColor: e.target.value} : settings)}
+                      placeholder="#HEX"
+                      maxLength={7}
+                      className={`flex-1 px-3 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                               text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                               focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                               ${submitLoading ? 'opacity-70' : ''}`}
+                      disabled={submitLoading}
+                    />
+                  </div>
+                </div>
+
+                {/* Cor Secundária */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                    Cor Secundária (Fundo)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={settings.secondaryColor || '#050505'}
+                      onChange={(e) => setSettings(prev => prev ? {...prev, secondaryColor: e.target.value} : settings)}
+                      className="h-12 w-12 rounded-lg bg-[#050505]/50 border border-neutral-700/50 p-1 cursor-pointer"
+                      disabled={submitLoading}
+                    />
+                    <input
+                      type="text"
+                      value={settings.secondaryColor || '#050505'}
+                      onChange={(e) => setSettings(prev => prev ? {...prev, secondaryColor: e.target.value} : settings)}
+                      placeholder="#HEX"
+                      maxLength={7}
+                      className={`flex-1 px-3 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                               text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                               focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                               ${submitLoading ? 'opacity-70' : ''}`}
+                      disabled={submitLoading}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Domínio Personalizado */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Domínio Customizado
+                </label>
+                <input
+                  type="text"
+                  value={settings.customDomain ?? ''}
+                  onChange={(e) => setSettings(prev => prev ? {...prev, customDomain: e.target.value} : settings)}
+                  placeholder="ex: www.minhaloja.com.br"
+                  className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                           text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                           ${submitLoading ? 'opacity-70' : ''}`}
+                  disabled={submitLoading}
+                />
+              </div>
+            </div>
+
+            {/* --- SEÇÃO PAGAMENTO --- */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest border-b border-white/5 pb-2">Recebimento PIX</h3>
+              
+              {/* PIX Key Section */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Chave PIX
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={settings.pixKey ?? ''}
+                    onChange={(e) => setSettings(prev => prev ? {...prev, pixKey: e.target.value} : settings)}
+                    placeholder="Digite sua chave PIX"
+                    className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
+                             text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
+                             focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
+                             ${submitLoading ? 'opacity-70' : ''}`}
+                    disabled={submitLoading}
+                  />
+                  {settings.pixKey && (
+                    <button
+                      type="button"
+                      onClick={() => setSettings(prev => prev ? {...prev, pixKey: ''} : settings)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center 
+                               text-neutral-400 hover:text-primary transition-colors"
+                      disabled={submitLoading}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* PIX Key Type Section */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Tipo da Chave PIX
+                </label>
                 <select
                   value={settings.pixKeyType ?? ''}
                   onChange={(e) => setSettings(prev => prev ? {...prev, pixKeyType: e.target.value} : settings)}
                   className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
                            text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
-                           focus:ring-2 focus:ring-[#DDAF02]/50 focus:border-[#DDAF02] transition-all
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
                            ${submitLoading ? 'opacity-70' : ''}`}
                   disabled={submitLoading}
                 >
@@ -262,18 +436,18 @@ export default function AdminSettingsPage() {
                   <option value="TELEFONE">Telefone</option>
                   <option value="ALEATORIA">Chave Aleatória</option>
                 </select>
-                <p className="mt-1 text-xs text-neutral-500">
-                  Selecione o tipo correspondente à chave PIX informada acima
-                </p>
               </div>
             </div>
 
-            {/* WhatsApp Number Section */}
-            <div className="space-y-4">
-              <label className="text-[10px] text-[#DDAF02] font-mono tracking-[0.25em] uppercase block mb-1">
-                Número do WhatsApp
-              </label>
-              <div className="relative">
+            {/* --- SEÇÃO CONTATO --- */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest border-b border-white/5 pb-2">Contato</h3>
+              
+              {/* WhatsApp Number Section */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-primary font-mono tracking-[0.25em] uppercase block">
+                  Número do WhatsApp
+                </label>
                 <input
                   type="tel"
                   value={settings.whatsappNumber ?? ''}
@@ -281,24 +455,20 @@ export default function AdminSettingsPage() {
                   placeholder="(DDD) 9XXXX-XXXX"
                   className={`w-full px-4 py-3 bg-[#050505]/50 border border-neutral-700/50 rounded-xl 
                            text-neutral-100 placeholder:text-neutral-400 focus:outline-none 
-                           focus:ring-2 focus:ring-[#DDAF02]/50 focus:border-[#DDAF02] transition-all
+                           focus:ring-2 focus:ring-primary/55 focus:border-primary transition-all
                            ${submitLoading ? 'opacity-70' : ''}`}
                   disabled={submitLoading}
                 />
-                <p className="mt-1 text-xs text-neutral-500">
-                  Número usado para notificações e atendimento ao cliente
-                </p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
               <Button
                 type="submit"
                 disabled={submitLoading || !settings}
-                className="w-full bg-[#dbb501] hover:bg-[#dbb501]/90 text-zinc-950 text-base py-6 font-semibold 
-                         shadow-[0_0_20px_rgba(219,181,1,0.3)] hover:shadow-[0_0_25px_rgba(219,181,1,0.4)] 
-                         transition-all flex items-center justify-center group"
+                className="w-full bg-primary hover:opacity-90 text-zinc-950 text-base py-6 font-semibold 
+                         shadow-[0_0_20px_rgba(221,175,2,0.3)] transition-all flex items-center justify-center group"
               >
                 {submitLoading ? (
                   <>
@@ -338,7 +508,7 @@ export default function AdminSettingsPage() {
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Apagar Dados
+                    Apagar Contatos
                   </>
                 )}
               </Button>
