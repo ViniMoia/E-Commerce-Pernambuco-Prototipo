@@ -57,7 +57,13 @@ export const getLojaFromHeaders = cache(async () => {
       return await getCachedLojaBySlug(slug);
     }
 
-    // Busca por slug ou domínio personalizado no banco
+    // Suporte nativo para domínios do Vercel
+    if (cleanHost.endsWith(".vercel.app")) {
+      const slug = cleanHost.replace(".vercel.app", "");
+      return await getCachedLojaBySlug(slug);
+    }
+
+    // Busca por slug (se a request vier direta sem domínio) ou domínio personalizado no banco
     return await getCachedLojaBySlugOrDomain(cleanHost);
   } catch (error) {
     console.error("[GET_LOJA_FROM_HEADERS_ERROR]", error);
