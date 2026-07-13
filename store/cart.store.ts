@@ -57,7 +57,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
         body: JSON.stringify({ variantID, productID, quantity }),
       });
       if (res.ok) {
-        await get().fetchCart();
+        const data = await res.json();
+        set({ cart: data });
       } else if (res.status === 401) {
         window.location.href = "/login";
       } else {
@@ -91,11 +92,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
       
       if (!res.ok) throw new Error("Failed to update");
       
-      // Silent background sync
-      const syncRes = await fetch("/api/cart");
-      if (syncRes.ok) {
-        set({ cart: await syncRes.json() });
-      }
+      const data = await res.json();
+      set({ cart: data });
     } catch (error) {
       console.error("Optimistic update failed, reverting...", error);
       set({ cart: previousCart });
@@ -117,11 +115,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
       
       if (!res.ok) throw new Error("Failed to delete");
 
-      // Silent background sync
-      const syncRes = await fetch("/api/cart");
-      if (syncRes.ok) {
-        set({ cart: await syncRes.json() });
-      }
+      const data = await res.json();
+      set({ cart: data });
     } catch (error) {
       console.error("Optimistic delete failed, reverting...", error);
       set({ cart: previousCart });

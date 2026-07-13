@@ -46,8 +46,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const item = await cartService.addToCart(user.id, parsed.data);
-    return NextResponse.json(item, { status: 201 });
+    await cartService.addToCart(user.id, parsed.data);
+    const cart = await cartService.getCart(user.id);
+    return NextResponse.json(cart || { items: [] }, { status: 201 });
   } catch (error: any) {
     console.error("[CART_POST_ERROR]", error);
     if (error instanceof cartService.CartError) {
@@ -74,13 +75,14 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const updatedItem = await cartService.updateCartItemQuantity(
+    await cartService.updateCartItemQuantity(
       user.id,
       parsed.data.variantID,
       parsed.data.quantity
     );
 
-    return NextResponse.json(updatedItem, { status: 200 });
+    const cart = await cartService.getCart(user.id);
+    return NextResponse.json(cart || { items: [] }, { status: 200 });
   } catch (error: any) {
     console.error("[CART_PATCH_ERROR]", error);
     if (error instanceof cartService.CartError) {
@@ -113,7 +115,8 @@ export async function DELETE(req: Request) {
     }
 
     await cartService.removeFromCart(user.id, variantID);
-    return NextResponse.json({ success: true }, { status: 200 });
+    const cart = await cartService.getCart(user.id);
+    return NextResponse.json(cart || { items: [] }, { status: 200 });
   } catch (error: any) {
     console.error("[CART_DELETE_ERROR]", error);
     if (error instanceof cartService.CartError) {
